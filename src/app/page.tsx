@@ -30,15 +30,11 @@ const energyGeneratorText = `《エネルギージェネレーター/Energy Gene
 【起】【ターン1回】：【コスト】[【エネルギーブラスト】(7)]することで、１枚引く。
 `;
 
-function getCellBgClass(index: number, energy: number, isDark: boolean): string {
-  if (index === energy) return "bg-emerald-400";
-  if (index < energy) return "bg-cyan-500/80";
-  return isDark ? "bg-slate-800/60" : "bg-slate-200";
-}
-
-function getCellTextClass(index: number, energy: number, isDark: boolean): string {
-  if (index <= energy) return "text-slate-900";
-  return isDark ? "text-slate-500" : "text-slate-400";
+// セル背景・文字色を一括で返す（選択中・以下・空の3状態）
+function getCellClasses(index: number, energy: number, isDark: boolean): string {
+  if (index === energy) return "bg-emerald-400 text-slate-900";
+  if (index < energy) return "bg-cyan-500/80 text-slate-900";
+  return isDark ? "bg-slate-800/60 text-slate-500" : "bg-slate-200 text-slate-400";
 }
 
 // セルコンテナ幅からインデックス計算 (flex-1均等分割前提)
@@ -53,6 +49,29 @@ function getIndexFromPointer(
     Math.min(ENERGY_MAX, Math.floor((clientX - rect.left) / cellWidth))
   );
   return rotate ? ENERGY_MAX - raw : raw;
+}
+
+// セルサイズからボタン・フォントサイズを計算
+function calcCellMetrics(cellSize: number) {
+  return {
+    btnHeight: Math.min(Math.round(cellSize * 0.8), 64),
+    btnPx: Math.min(Math.round(cellSize * 0.45), 28),
+    btnFontSize: Math.max(10, Math.min(Math.round(cellSize * 0.28), 16)),
+    cellFontSize: Math.max(10, Math.min(Math.round(cellSize * 0.35), 22)),
+  };
+}
+
+// プレイヤー・テーマによるゲージ配色クラスを返す
+function getGaugeTheme(player: "p1" | "p2", isDark: boolean) {
+  return {
+    accentBorder: player === "p1" ? "border-blue-400/50" : "border-red-400/50",
+    panelBg: player === "p1"
+      ? isDark ? "bg-blue-950/50" : "bg-blue-50"
+      : isDark ? "bg-red-950/50" : "bg-red-50",
+    cellBorder: isDark ? "border-slate-600" : "border-slate-300",
+    cellDivider: isDark ? "border-slate-600/50" : "border-slate-300/70",
+    resizeHandleColor: isDark ? "bg-slate-500" : "bg-slate-300",
+  };
 }
 
 type EnergyGaugeProps = {
@@ -103,22 +122,14 @@ function EnergyGauge({
     cellsRef.current?.setPointerCapture(e.pointerId);
     if (cellsRef.current)
       onEnergyChange(
-        getIndexFromPointer(
-          e.clientX,
-          cellsRef.current.getBoundingClientRect(),
-          rotate
-        )
+        getIndexFromPointer(e.clientX, cellsRef.current.getBoundingClientRect(), rotate)
       );
   };
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!isDragging.current || !cellsRef.current) return;
     onEnergyChange(
-      getIndexFromPointer(
-        e.clientX,
-        cellsRef.current.getBoundingClientRect(),
-        rotate
-      )
+      getIndexFromPointer(e.clientX, cellsRef.current.getBoundingClientRect(), rotate)
     );
   };
 
@@ -150,18 +161,9 @@ function EnergyGauge({
     resizeStart.current = null;
   };
 
-  const accentBorder = player === "p1" ? "border-blue-400/50" : "border-red-400/50";
-  const panelBg = player === "p1"
-    ? isDark ? "bg-blue-950/50" : "bg-blue-50"
-    : isDark ? "bg-red-950/50" : "bg-red-50";
-  const cellBorder = isDark ? "border-slate-600" : "border-slate-300";
-  const cellDivider = isDark ? "border-slate-600/50" : "border-slate-300/70";
-  const handleColor = isDark ? "bg-slate-500" : "bg-slate-300";
-
-  const btnHeight = Math.min(Math.round(cellSize * 0.8), 64);
-  const btnPx = Math.min(Math.round(cellSize * 0.45), 28);
-  const btnFontSize = Math.max(10, Math.min(Math.round(cellSize * 0.28), 16));
-  const cellFontSize = Math.max(10, Math.min(Math.round(cellSize * 0.35), 22));
+  const { accentBorder, panelBg, cellBorder, cellDivider, resizeHandleColor } =
+    getGaugeTheme(player, isDark);
+  const { btnHeight, btnPx, btnFontSize, cellFontSize } = calcCellMetrics(cellSize);
 
   return (
     <div
@@ -175,7 +177,7 @@ function EnergyGauge({
         onPointerUp={handleResizeUp}
         onPointerCancel={handleResizeUp}
       >
-        <div className={`w-12 h-1 rounded-full ${handleColor}`} />
+        <div className={`w-12 h-1 rounded-full ${resizeHandleColor}`} />
       </div>
 
       <div className="w-full flex flex-col gap-3">
@@ -193,12 +195,7 @@ function EnergyGauge({
             <button
               key={i}
               type="button"
-              className={`
-                flex-1 min-w-0 font-bold
-                ${getCellBgClass(i, energy, isDark)}
-                ${getCellTextClass(i, energy, isDark)}
-                flex items-center justify-center border-r ${cellDivider} text-center select-none transition-colors
-              `}
+              className={`flex-1 min-w-0 font-bold flex items-center justify-center border-r ${cellDivider} text-center select-none transition-colors ${getCellClasses(i, energy, isDark)}`}
               style={{ height: cellSize, fontSize: cellFontSize }}
               onClick={() => onEnergyChange(i)}
               aria-label={`${player} energy ${i}`}
