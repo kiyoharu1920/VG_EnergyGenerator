@@ -98,6 +98,15 @@ function useViewportSize() {
   return viewport;
 }
 
+// 一部の合成ポインターイベントでは capture 対象が存在しないことがある。
+function setPointerCaptureSafely(element: HTMLElement, pointerId: number) {
+  try {
+    element.setPointerCapture(pointerId);
+  } catch {
+    // capture できない場合もタップ処理自体は継続する。
+  }
+}
+
 // プレイヤー・テーマによるゲージ配色クラスを返す
 function getGaugeTheme(player: "p1" | "p2", isDark: boolean) {
   return {
@@ -158,7 +167,7 @@ function EnergyGauge({
   // エネルギーセル操作
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     isDragging.current = true;
-    cellsRef.current?.setPointerCapture(e.pointerId);
+    if (cellsRef.current) setPointerCaptureSafely(cellsRef.current, e.pointerId);
     if (cellsRef.current)
       onEnergyChange(
         getIndexFromPointer(e.clientX, cellsRef.current.getBoundingClientRect(), rotate)
@@ -181,7 +190,7 @@ function EnergyGauge({
   // P2(rotate=true): 下方向ドラッグ=拡大(P2視点) → sign=1
   const handleResizeDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+    setPointerCaptureSafely(e.currentTarget as HTMLDivElement, e.pointerId);
     resizeStart.current = { y: e.clientY, size: cellSize };
   };
 
