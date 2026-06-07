@@ -1,12 +1,14 @@
 "use client";
-import { useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const ENERGY_MAX = 10;
 const clampEnergy = (value: number) => Math.max(0, Math.min(ENERGY_MAX, value));
 
 const CELL_DEFAULT = 44;
 const CELL_MIN = 28;
-const CELL_MAX = 144;
+const CELL_MAX = 112;
+
+type PlayerMode = "single" | "double";
 
 type StepButton = readonly [delta: number, colorClass: string];
 
@@ -17,8 +19,6 @@ const STEP_BUTTONS: StepButton[] = [
   [+1, "bg-rose-500 hover:bg-rose-400 active:bg-rose-300 shadow-md shadow-rose-700/50"],
   [+3, "bg-rose-700 hover:bg-rose-600 active:bg-rose-500 shadow-lg shadow-rose-900/50"],
 ];
-const NEGATIVE_STEP_BUTTONS = STEP_BUTTONS.filter(([delta]) => delta < 0);
-const POSITIVE_STEP_BUTTONS = STEP_BUTTONS.filter(([delta]) => delta > 0);
 
 const energyGeneratorText = `《エネルギージェネレーター/Energy Generator》
 ライドデッキクレスト
@@ -55,10 +55,56 @@ function getIndexFromPointer(
 function calcCellMetrics(cellSize: number) {
   return {
     btnHeight: Math.min(Math.round(cellSize * 0.8), 64),
-    btnPx: Math.min(Math.round(cellSize * 0.45), 28),
+    btnPx: Math.min(Math.round(cellSize * 0.28), 18),
     btnFontSize: Math.max(10, Math.min(Math.round(cellSize * 0.28), 16)),
     cellFontSize: Math.max(10, Math.min(Math.round(cellSize * 0.35), 22)),
   };
+}
+
+// 画面高さに応じたセル上限。閉じた説明枠や1人用では大きめに使える。
+function getResponsiveCellMax(
+  width: number,
+  height: number,
+  playerMode: PlayerMode,
+  showCardText: boolean
+) {
+  const gaugeCount = playerMode === "double" ? 2 : 1;
+  const shortestSide = Math.min(width, height);
+  const pagePadding = Math.max(8, shortestSide * 0.04);
+  const centerReserve = showCardText
+    ? playerMode === "double" ? 86 : 126
+    : 54;
+  const availablePerGauge =
+    (height - pagePadding * 2 - centerReserve - 18) / gaugeCount;
+  const maxFromHeight = Math.floor((availablePerGauge - 58) / 1.8);
+  return Math.max(CELL_MIN, Math.min(CELL_MAX, maxFromHeight));
+}
+
+function useViewportSize() {
+  const [viewport, setViewport] = useState({ width: 390, height: 844 });
+
+  useEffect(() => {
+    const update = () =>
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("orientationchange", update);
+    };
+  }, []);
+
+  return viewport;
+}
+
+// 一部の合成ポインターイベントでは capture 対象が存在しないことがある。
+function setPointerCaptureSafely(element: HTMLElement, pointerId: number) {
+  try {
+    element.setPointerCapture(pointerId);
+  } catch {
+    // capture できない場合もタップ処理自体は継続する。
+  }
 }
 
 // プレイヤー・テーマによるゲージ配色クラスを返す
@@ -81,6 +127,7 @@ type EnergyGaugeProps = {
   rotate: boolean;
   isDark: boolean;
   cellSize: number;
+  maxCellSize: number;
   onCellSizeChange: (size: number) => void;
 };
 
@@ -110,6 +157,7 @@ function EnergyGauge({
   rotate,
   isDark,
   cellSize,
+  maxCellSize,
   onCellSizeChange,
 }: EnergyGaugeProps) {
   const cellsRef = useRef<HTMLDivElement>(null);
@@ -119,7 +167,7 @@ function EnergyGauge({
   // エネルギーセル操作
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     isDragging.current = true;
-    cellsRef.current?.setPointerCapture(e.pointerId);
+    if (cellsRef.current) setPointerCaptureSafely(cellsRef.current, e.pointerId);
     if (cellsRef.current)
       onEnergyChange(
         getIndexFromPointer(e.clientX, cellsRef.current.getBoundingClientRect(), rotate)
@@ -142,7 +190,7 @@ function EnergyGauge({
   // P2(rotate=true): 下方向ドラッグ=拡大(P2視点) → sign=1
   const handleResizeDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
-    (e.currentTarget as HTMLDivElement).setPointerCapture(e.pointerId);
+    setPointerCaptureSafely(e.currentTarget as HTMLDivElement, e.pointerId);
     resizeStart.current = { y: e.clientY, size: cellSize };
   };
 
@@ -152,7 +200,7 @@ function EnergyGauge({
     const sign = rotate ? 1 : -1;
     const newSize = Math.max(
       CELL_MIN,
-      Math.min(CELL_MAX, Math.round(startSize + sign * (e.clientY - startY) * 0.5))
+      Math.min(maxCellSize, Math.round(startSize + sign * (e.clientY - startY) * 0.5))
     );
     onCellSizeChange(newSize);
   };
@@ -167,29 +215,34 @@ function EnergyGauge({
 
   return (
     <div
-      className={`flex flex-col items-center w-full rounded-2xl border gap-2 px-[10%] pb-2 pt-1 transition-colors ${panelBg} ${accentBorder} ${rotate ? "rotate-180" : ""}`}
+      data-testid={`${player}-gauge`}
+      className={`flex flex-col items-center w-full rounded-2xl border gap-1 px-[clamp(10px,7vw,72px)] pb-2 pt-1 transition-colors ${panelBg} ${accentBorder} ${rotate ? "rotate-180" : ""}`}
     >
       {/* リサイズハンドル: 内側エッジ(DOM上端) */}
       <div
+        data-testid={`${player}-resize`}
         className="w-full h-5 flex items-center justify-center cursor-ns-resize touch-none select-none"
         onPointerDown={handleResizeDown}
         onPointerMove={handleResizeMove}
         onPointerUp={handleResizeUp}
         onPointerCancel={handleResizeUp}
+        onLostPointerCapture={handleResizeUp}
       >
         <div className={`w-12 h-1 rounded-full ${resizeHandleColor}`} />
       </div>
 
-      <div className="w-full flex flex-col gap-3">
+      <div className="w-full flex flex-col gap-2">
 
         {/* エネルギーセル: flex-1均等分割で常に全幅表示 */}
         <div
           ref={cellsRef}
+          data-testid={`${player}-cells`}
           className={`w-full flex border ${cellBorder} rounded-xl overflow-hidden touch-none`}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
           onPointerUp={handlePointerUp}
           onPointerCancel={handlePointerUp}
+          onLostPointerCapture={handlePointerUp}
         >
           {Array.from({ length: ENERGY_MAX + 1 }, (_, i) => (
             <button
@@ -197,7 +250,9 @@ function EnergyGauge({
               type="button"
               className={`flex-1 min-w-0 font-bold flex items-center justify-center border-r ${cellDivider} text-center select-none transition-colors ${getCellClasses(i, energy, isDark)}`}
               style={{ height: cellSize, fontSize: cellFontSize }}
-              onClick={() => onEnergyChange(i)}
+              onClick={(e) => {
+                if (e.detail === 0) onEnergyChange(i);
+              }}
               aria-label={`${player} energy ${i}`}
               aria-pressed={i === energy}
             >
@@ -206,32 +261,18 @@ function EnergyGauge({
           ))}
         </div>
 
-        {/* 操作ボタン行: パネル全幅でjustify-between */}
-        <div className="flex items-center w-full justify-between pb-1">
-          <div className="flex gap-2">
-            {NEGATIVE_STEP_BUTTONS.map(([d, cls]) => (
-              <button
-                key={d}
-                className={`flex items-center justify-center text-white rounded-full select-none font-bold transition-all active:scale-95 ${cls}`}
-                style={{ height: btnHeight, paddingInline: btnPx, fontSize: btnFontSize }}
-                onClick={() => onEnergyChange(clampEnergy(energy + d))}
-              >
-                {d}
-              </button>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            {POSITIVE_STEP_BUTTONS.map(([d, cls]) => (
-              <button
-                key={d}
-                className={`flex items-center justify-center text-white rounded-full select-none font-bold transition-all active:scale-95 ${cls}`}
-                style={{ height: btnHeight, paddingInline: btnPx, fontSize: btnFontSize }}
-                onClick={() => onEnergyChange(clampEnergy(energy + d))}
-              >
-                +{d}
-              </button>
-            ))}
-          </div>
+        {/* 操作ボタン行: 5列固定で小幅端末の横はみ出しを防ぐ */}
+        <div className="grid grid-cols-5 gap-1 sm:gap-2 w-full pb-1">
+          {STEP_BUTTONS.map(([d, cls]) => (
+            <button
+              key={d}
+              className={`min-w-0 flex items-center justify-center text-white rounded-full select-none font-bold transition-all active:scale-95 ${cls}`}
+              style={{ height: btnHeight, paddingInline: btnPx, fontSize: btnFontSize }}
+              onClick={() => onEnergyChange(clampEnergy(energy + d))}
+            >
+              {d > 0 ? `+${d}` : d}
+            </button>
+          ))}
         </div>
 
       </div>
@@ -243,39 +284,88 @@ export default function Home() {
   const [p1Energy, setP1Energy] = useState(0);
   const [p2Energy, setP2Energy] = useState(0);
   const [isDark, setIsDark] = useState(false);
+  const [playerMode, setPlayerMode] = useState<PlayerMode>("double");
+  const [showCardText, setShowCardText] = useState(true);
   const [cellSize, setCellSize] = useState(CELL_DEFAULT);
+  const viewport = useViewportSize();
+  const maxCellSize = useMemo(
+    () => getResponsiveCellMax(viewport.width, viewport.height, playerMode, showCardText),
+    [viewport.width, viewport.height, playerMode, showCardText]
+  );
+  const effectiveCellSize = Math.min(cellSize, maxCellSize);
 
   const rootBg = isDark ? "bg-slate-950" : "bg-slate-100";
   const controlBg = isDark
-    ? "bg-slate-700 hover:bg-slate-600 text-white"
-    : "bg-white hover:bg-slate-200 text-slate-600 shadow-md";
+    ? "bg-slate-700 hover:bg-slate-600 text-white border-slate-500"
+    : "bg-white hover:bg-slate-200 text-slate-700 border-slate-200 shadow-md";
+  const centerBg = isDark
+    ? "bg-slate-900/70 border-slate-700"
+    : "bg-white/90 border-slate-200";
+  const isDouble = playerMode === "double";
+  const gridRows = isDouble
+    ? showCardText
+      ? "grid-rows-[auto_minmax(0,1fr)_auto]"
+      : "grid-rows-[auto_auto_auto] content-center"
+    : showCardText
+      ? "grid-rows-[minmax(0,1fr)_auto]"
+      : "grid-rows-[auto_auto] content-center";
 
   return (
-    <div className={`fixed inset-0 transition-colors ${rootBg} flex justify-center`}>
-      {/* テーマ切替ボタン */}
-      <button
-        onClick={() => setIsDark(!isDark)}
-        className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-9 h-9 rounded-full flex items-center justify-center text-base transition-all ${controlBg}`}
-        aria-label="toggle theme"
+    <div className={`fixed inset-0 overflow-hidden transition-colors ${rootBg} flex justify-center`}>
+      <div
+        className={`w-full max-w-3xl h-full grid ${gridRows} items-stretch p-[2vmin] box-border gap-[2vmin]`}
       >
-        {isDark ? "☀" : "🌙"}
-      </button>
+        {isDouble && (
+          <EnergyGauge
+            player="p2"
+            energy={p2Energy}
+            onEnergyChange={setP2Energy}
+            rotate
+            isDark={isDark}
+            cellSize={effectiveCellSize}
+            maxCellSize={maxCellSize}
+            onCellSizeChange={setCellSize}
+          />
+        )}
 
-      <div className="w-full max-w-3xl h-full flex flex-col items-center justify-between p-[2vmin] box-border gap-[2vmin]">
-        <EnergyGauge
-          player="p2"
-          energy={p2Energy}
-          onEnergyChange={setP2Energy}
-          rotate
-          isDark={isDark}
-          cellSize={cellSize}
-          onCellSizeChange={setCellSize}
-        />
+        <div className="min-h-0 flex flex-col gap-[1.5vmin]">
+          {/* 中央操作: 対戦人数・説明枠・テーマ */}
+          <div className={`shrink-0 w-full rounded-xl border p-1.5 flex items-center justify-center gap-1.5 transition-colors ${centerBg}`}>
+            <button
+              data-testid="player-mode-toggle"
+              onClick={() => setPlayerMode(isDouble ? "single" : "double")}
+              className={`h-8 min-w-0 flex-1 rounded-lg border px-2 text-[12px] font-bold transition-colors ${controlBg}`}
+              aria-label="toggle player mode"
+            >
+              {isDouble ? "2人用" : "1人用"}
+            </button>
+            <button
+              data-testid="card-text-toggle"
+              onClick={() => setShowCardText(!showCardText)}
+              className={`h-8 min-w-0 flex-1 rounded-lg border px-2 text-[12px] font-bold transition-colors ${controlBg}`}
+              aria-expanded={showCardText}
+            >
+              {showCardText ? "説明 閉" : "説明 開"}
+            </button>
+            <button
+              data-testid="theme-toggle"
+              onClick={() => setIsDark(!isDark)}
+              className={`h-8 min-w-0 flex-1 rounded-lg border px-2 text-[12px] font-bold transition-colors ${controlBg}`}
+              aria-label="toggle theme"
+            >
+              {isDark ? "明色" : "暗色"}
+            </button>
+          </div>
 
-        {/* カードテキスト: フォントサイズはvminベース、スクロールバー非表示 */}
-        <div className="flex portrait:flex-col landscape:flex-row gap-[2vmin] items-stretch w-full flex-1 min-h-0">
-          <EnergyTextCard rotate isDark={isDark} className="border-red-500/30" />
-          <EnergyTextCard isDark={isDark} className="border-blue-500/30" />
+          {/* カードテキスト: 閉じた時は中央操作だけ残し、ゲージ側へ高さを戻す */}
+          {showCardText && (
+            <div className="flex portrait:flex-col landscape:flex-row gap-[2vmin] items-stretch w-full flex-1 min-h-0">
+              {isDouble && (
+                <EnergyTextCard rotate isDark={isDark} className="border-red-500/30" />
+              )}
+              <EnergyTextCard isDark={isDark} className="border-blue-500/30" />
+            </div>
+          )}
         </div>
 
         <EnergyGauge
@@ -284,7 +374,8 @@ export default function Home() {
           onEnergyChange={setP1Energy}
           rotate={false}
           isDark={isDark}
-          cellSize={cellSize}
+          cellSize={effectiveCellSize}
+          maxCellSize={maxCellSize}
           onCellSizeChange={setCellSize}
         />
       </div>
