@@ -17,6 +17,7 @@ AGENTS.md
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+*.log
 
 # testing
 /coverage/
