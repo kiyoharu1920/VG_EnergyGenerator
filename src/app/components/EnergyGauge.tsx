@@ -48,11 +48,26 @@ type EnergyGaugeProps = {
 
 /** エネルギー増減ボタン。色はカードゲームの増減方向が見分けやすい順に固定する。 */
 const STEP_BUTTONS: StepButton[] = [
-  [-7, "bg-violet-700 hover:bg-violet-600 active:bg-violet-500 shadow-lg shadow-violet-900/50"],
-  [-3, "bg-blue-700 hover:bg-blue-600 active:bg-blue-500 shadow-lg shadow-blue-900/50"],
-  [-1, "bg-blue-500 hover:bg-blue-400 active:bg-blue-300 shadow-md shadow-blue-700/50"],
-  [+1, "bg-rose-500 hover:bg-rose-400 active:bg-rose-300 shadow-md shadow-rose-700/50"],
-  [+3, "bg-rose-700 hover:bg-rose-600 active:bg-rose-500 shadow-lg shadow-rose-900/50"],
+  [
+    -7,
+    "bg-violet-700 hover:bg-violet-600 active:bg-violet-500 shadow-lg shadow-violet-900/50",
+  ],
+  [
+    -3,
+    "bg-blue-700 hover:bg-blue-600 active:bg-blue-500 shadow-lg shadow-blue-900/50",
+  ],
+  [
+    -1,
+    "bg-blue-500 hover:bg-blue-400 active:bg-blue-300 shadow-md shadow-blue-700/50",
+  ],
+  [
+    +1,
+    "bg-rose-500 hover:bg-rose-400 active:bg-rose-300 shadow-md shadow-rose-700/50",
+  ],
+  [
+    +3,
+    "bg-rose-700 hover:bg-rose-600 active:bg-rose-500 shadow-lg shadow-rose-900/50",
+  ],
 ];
 
 /**
@@ -73,10 +88,16 @@ function clampEnergy(value: number): number {
  * @param isDark 暗色テーマかどうか。
  * @returns 選択中、充填済み、空セルのTailwindクラス。
  */
-function getCellClasses(index: number, energy: number, isDark: boolean): string {
+function getCellClasses(
+  index: number,
+  energy: number,
+  isDark: boolean,
+): string {
   if (index === energy) return "bg-emerald-400 text-slate-900";
   if (index < energy) return "bg-cyan-500/80 text-slate-900";
-  return isDark ? "bg-slate-800/60 text-slate-500" : "bg-slate-200 text-slate-400";
+  return isDark
+    ? "bg-slate-800/60 text-slate-500"
+    : "bg-slate-200 text-slate-400";
 }
 
 /**
@@ -90,12 +111,12 @@ function getCellClasses(index: number, energy: number, isDark: boolean): string 
 function getIndexFromPointer(
   clientX: number,
   rect: DOMRect,
-  rotate: boolean
+  rotate: boolean,
 ): number {
   const cellWidth = rect.width / ENERGY_CELL_COUNT;
   const raw = Math.max(
     0,
-    Math.min(ENERGY_MAX, Math.floor((clientX - rect.left) / cellWidth))
+    Math.min(ENERGY_MAX, Math.floor((clientX - rect.left) / cellWidth)),
   );
   return rotate ? ENERGY_MAX - raw : raw;
 }
@@ -128,13 +149,15 @@ export function getResponsiveCellMax(
   width: number,
   height: number,
   playerMode: PlayerMode,
-  showCardText: boolean
+  showCardText: boolean,
 ): number {
   const gaugeCount = playerMode === "double" ? 2 : 1;
   const shortestSide = Math.min(width, height);
   const pagePadding = Math.max(8, shortestSide * 0.04);
   const centerReserve = showCardText
-    ? playerMode === "double" ? 86 : 126
+    ? playerMode === "double"
+      ? 86
+      : 126
     : 54;
   const availablePerGauge =
     (height - pagePadding * 2 - centerReserve - 18) / gaugeCount;
@@ -150,7 +173,10 @@ export function getResponsiveCellMax(
  * @param element capture対象のHTML要素。
  * @param pointerId pointerイベントID。
  */
-function setPointerCaptureSafely(element: HTMLElement, pointerId: number): void {
+function setPointerCaptureSafely(
+  element: HTMLElement,
+  pointerId: number,
+): void {
   try {
     element.setPointerCapture(pointerId);
   } catch {
@@ -185,14 +211,20 @@ export function EnergyGauge({
     const el = cellsRef.current;
     if (!el) return;
     setPointerCaptureSafely(el, e.pointerId);
-    onEnergyChange(getIndexFromPointer(e.clientX, el.getBoundingClientRect(), rotate));
+    onEnergyChange(
+      getIndexFromPointer(e.clientX, el.getBoundingClientRect(), rotate),
+    );
   };
 
   /** セル列をドラッグ中だけ、ポインター位置に合わせてエネルギーを更新する。 */
   const handlePointerMove = (e: PointerEvent<HTMLDivElement>): void => {
     if (!isDragging.current || !cellsRef.current) return;
     onEnergyChange(
-      getIndexFromPointer(e.clientX, cellsRef.current.getBoundingClientRect(), rotate)
+      getIndexFromPointer(
+        e.clientX,
+        cellsRef.current.getBoundingClientRect(),
+        rotate,
+      ),
     );
   };
 
@@ -212,10 +244,14 @@ export function EnergyGauge({
   const handleResizeMove = (e: PointerEvent<HTMLDivElement>): void => {
     if (!resizeStart.current) return;
     const { y: startY, size: startSize } = resizeStart.current;
-    const sign = resizeHandlePosition === "bottom" ? (rotate ? -1 : 1) : rotate ? 1 : -1;
+    const sign =
+      resizeHandlePosition === "bottom" ? (rotate ? -1 : 1) : rotate ? 1 : -1;
     const newSize = Math.max(
       CELL_MIN,
-      Math.min(maxCellSize, Math.round(startSize + sign * (e.clientY - startY) * 0.5))
+      Math.min(
+        maxCellSize,
+        Math.round(startSize + sign * (e.clientY - startY) * 0.5),
+      ),
     );
     onCellSizeChange(newSize);
   };
@@ -227,7 +263,8 @@ export function EnergyGauge({
 
   const { accentBorder, panelBg, cellBorder, cellDivider, resizeHandleColor } =
     getGaugeTheme(player, isDark);
-  const { btnHeight, btnPx, btnFontSize, cellFontSize } = calcCellMetrics(cellSize);
+  const { btnHeight, btnPx, btnFontSize, cellFontSize } =
+    calcCellMetrics(cellSize);
   const resizeHandle: ReactElement = (
     <div
       data-testid={`${player}-resize`}
@@ -250,7 +287,6 @@ export function EnergyGauge({
       {resizeHandlePosition === "top" && resizeHandle}
 
       <div className="w-full flex flex-col gap-2">
-
         {/* エネルギーセル: flex-1均等分割で常に全幅表示 */}
         <div
           ref={cellsRef}
@@ -284,15 +320,19 @@ export function EnergyGauge({
           {STEP_BUTTONS.map(([d, cls]) => (
             <button
               key={d}
+              type="button"
               className={`min-w-0 flex items-center justify-center text-white rounded-full select-none font-bold transition-all active:scale-95 ${cls}`}
-              style={{ height: btnHeight, paddingInline: btnPx, fontSize: btnFontSize }}
+              style={{
+                height: btnHeight,
+                paddingInline: btnPx,
+                fontSize: btnFontSize,
+              }}
               onClick={() => onEnergyChange(clampEnergy(energy + d))}
             >
               {d > 0 ? `+${d}` : d}
             </button>
           ))}
         </div>
-
       </div>
       {resizeHandlePosition === "bottom" && resizeHandle}
     </div>

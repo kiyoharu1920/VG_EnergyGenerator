@@ -54,7 +54,9 @@ export function ControlPanel({
 }: ControlPanelProps): ReactElement {
   const { controlBg, centerBg } = getPageTheme(isDark);
   const isHorizontal = layout === "horizontal";
-  const panelDirectionClass = isHorizontal ? "flex-row" : "portrait:flex-row landscape:flex-col";
+  const panelDirectionClass = isHorizontal
+    ? "flex-row"
+    : "portrait:flex-row landscape:flex-col";
   const controlButtonClass = isHorizontal ? "" : "landscape:w-full";
   const diceCoinWrapperClass = isHorizontal ? "w-16" : "w-16 landscape:w-full";
   const themeWrapperClass = isHorizontal ? "w-10" : "w-10 landscape:w-full";
@@ -65,17 +67,26 @@ export function ControlPanel({
       className={`shrink-0 w-full rounded-xl border p-1.5 flex ${panelDirectionClass} items-center justify-center gap-1.5 transition-colors ${centerBg}`}
     >
       <button
+        type="button"
         data-testid="player-mode-toggle"
         onClick={onTogglePlayerMode}
         className={`control-pressable h-8 min-w-0 flex-1 ${controlButtonClass} rounded-lg border px-2 text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.97] ${controlBg}`}
-        aria-label={isDouble ? "switch to single player" : "switch to two players"}
+        aria-label={
+          isDouble ? "switch to single player" : "switch to two players"
+        }
       >
-        <span key={isDouble ? "double" : "single"} className="control-value-pop">
+        <span
+          key={isDouble ? "double" : "single"}
+          className="control-value-pop"
+        >
           {isDouble ? "1人用へ" : "2人用へ"}
         </span>
       </button>
-      <div className={`${diceCoinWrapperClass} shrink-0 flex items-center justify-center`}>
+      <div
+        className={`${diceCoinWrapperClass} shrink-0 flex items-center justify-center`}
+      >
         <button
+          type="button"
           key={`dice-button-${diceRollId}`}
           data-testid="dice-roll"
           onClick={onRollDice}
@@ -93,8 +104,11 @@ export function ControlPanel({
           </span>
         </button>
       </div>
-      <div className={`${themeWrapperClass} shrink-0 flex items-center justify-center`}>
+      <div
+        className={`${themeWrapperClass} shrink-0 flex items-center justify-center`}
+      >
         <button
+          type="button"
           data-testid="theme-toggle"
           onClick={onToggleDark}
           className={`control-pressable h-8 w-8 shrink-0 rounded-full border text-base font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${controlBg}`}
@@ -105,8 +119,11 @@ export function ControlPanel({
           </span>
         </button>
       </div>
-      <div className={`${diceCoinWrapperClass} shrink-0 flex items-center justify-center`}>
+      <div
+        className={`${diceCoinWrapperClass} shrink-0 flex items-center justify-center`}
+      >
         <button
+          type="button"
           key={`coin-button-${coinTossId}`}
           data-testid="coin-toss"
           onClick={onTossCoin}
@@ -125,12 +142,16 @@ export function ControlPanel({
         </button>
       </div>
       <button
+        type="button"
         data-testid="card-text-toggle"
         onClick={onToggleCardText}
         className={`control-pressable h-8 min-w-0 flex-1 ${controlButtonClass} rounded-lg border px-2 text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.97] ${controlBg}`}
         aria-expanded={showCardText}
       >
-        <span key={showCardText ? "open" : "closed"} className="control-value-pop">
+        <span
+          key={showCardText ? "open" : "closed"}
+          className="control-value-pop"
+        >
           {showCardText ? "効果欄を閉じる" : "効果欄を開く"}
         </span>
       </button>
