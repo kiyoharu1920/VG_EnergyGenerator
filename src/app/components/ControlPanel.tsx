@@ -31,6 +31,75 @@ type ControlPanelProps = {
   onTossCoin: () => void;
 };
 
+type RandomToolButtonProps = {
+  /** ボタンのテストID。 */
+  testid: "dice-roll" | "coin-toss";
+  /** 結果更新を識別する実行回数。 */
+  rollId: number;
+  /** 表示する結果。未実行ならnull。 */
+  result: number | CoinResult | null;
+  /** 未実行時に表示するアイコン。 */
+  idleIcon: string;
+  /** ツールチップ文言。 */
+  title: string;
+  /** 支援技術向けラベル。 */
+  "aria-label": string;
+  /** ボタン内の文字サイズクラス。 */
+  fontSizeClass: string;
+  /** 外側ラッパーの幅クラス。 */
+  wrapperClass: string;
+  /** ボタン押下時の処理。 */
+  onClick: () => void;
+  /** テーマに応じた背景クラス。 */
+  controlBg: string;
+};
+
+/**
+ * サイコロやコイントスの結果表示つき実行ボタン。
+ *
+ * @param props ランダムツールボタンの表示状態と操作ハンドラ。
+ * @returns ランダムツール用ボタン。
+ */
+function RandomToolButton(props: RandomToolButtonProps): ReactElement {
+  const {
+    testid,
+    rollId,
+    result,
+    idleIcon,
+    title,
+    fontSizeClass,
+    wrapperClass,
+    onClick,
+    controlBg,
+  } = props;
+  const ariaLabel = props["aria-label"];
+  const toolKey = testid === "dice-roll" ? "dice" : "coin";
+
+  return (
+    <div
+      className={`${wrapperClass} shrink-0 flex items-center justify-center`}
+    >
+      <button
+        key={`${toolKey}-button-${rollId}`}
+        data-testid={testid}
+        onClick={onClick}
+        className={`control-pressable h-8 w-16 shrink-0 rounded-full border ${fontSizeClass} font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${rollId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
+        aria-label={ariaLabel}
+        title={title}
+      >
+        <span
+          key={`${toolKey}-${rollId}-${result ?? "idle"}`}
+          data-animation-id={rollId}
+          className="control-value-pop"
+          aria-live="polite"
+        >
+          {result ?? idleIcon}
+        </span>
+      </button>
+    </div>
+  );
+}
+
 /**
  * プレイヤー切替、TCG補助ツール、テーマ切替、効果欄開閉をまとめた操作バー。
  *
@@ -74,25 +143,18 @@ export function ControlPanel({
           {isDouble ? "1人用へ" : "2人用へ"}
         </span>
       </button>
-      <div className={`${diceCoinWrapperClass} shrink-0 flex items-center justify-center`}>
-        <button
-          key={`dice-button-${diceRollId}`}
-          data-testid="dice-roll"
-          onClick={onRollDice}
-          className={`control-pressable h-8 w-16 shrink-0 rounded-full border text-sm font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${diceRollId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
-          aria-label="roll dice"
-          title="サイコロ"
-        >
-          <span
-            key={`dice-${diceRollId}-${diceResult ?? "idle"}`}
-            data-animation-id={diceRollId}
-            className="control-value-pop"
-            aria-live="polite"
-          >
-            {diceResult ?? "🎲"}
-          </span>
-        </button>
-      </div>
+      <RandomToolButton
+        testid="dice-roll"
+        rollId={diceRollId}
+        result={diceResult}
+        idleIcon="🎲"
+        title="サイコロ"
+        aria-label="roll dice"
+        fontSizeClass="text-sm"
+        wrapperClass={diceCoinWrapperClass}
+        onClick={onRollDice}
+        controlBg={controlBg}
+      />
       <div className={`${themeWrapperClass} shrink-0 flex items-center justify-center`}>
         <button
           data-testid="theme-toggle"
@@ -105,25 +167,18 @@ export function ControlPanel({
           </span>
         </button>
       </div>
-      <div className={`${diceCoinWrapperClass} shrink-0 flex items-center justify-center`}>
-        <button
-          key={`coin-button-${coinTossId}`}
-          data-testid="coin-toss"
-          onClick={onTossCoin}
-          className={`control-pressable h-8 w-16 shrink-0 rounded-full border text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${coinTossId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
-          aria-label="coin toss"
-          title="コイントス"
-        >
-          <span
-            key={`coin-${coinTossId}-${coinResult ?? "idle"}`}
-            data-animation-id={coinTossId}
-            className="control-value-pop"
-            aria-live="polite"
-          >
-            {coinResult ?? "🪙"}
-          </span>
-        </button>
-      </div>
+      <RandomToolButton
+        testid="coin-toss"
+        rollId={coinTossId}
+        result={coinResult}
+        idleIcon="🪙"
+        title="コイントス"
+        aria-label="coin toss"
+        fontSizeClass="text-[12px]"
+        wrapperClass={diceCoinWrapperClass}
+        onClick={onTossCoin}
+        controlBg={controlBg}
+      />
       <button
         data-testid="card-text-toggle"
         onClick={onToggleCardText}

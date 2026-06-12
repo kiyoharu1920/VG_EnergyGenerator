@@ -1,46 +1,15 @@
 "use client";
 
 import type { ReactElement } from "react";
-import { useEffect, useMemo, useState } from "react";
-import { flushSync } from "react-dom";
+import { useMemo, useState } from "react";
 import { ControlPanel } from "./components/ControlPanel";
 import { EnergyGauge, CELL_DEFAULT, getResponsiveCellMax } from "./components/EnergyGauge";
 import { EnergyTextCard } from "./components/EnergyTextCard";
 import { useStoredSettings, writeStoredSettings } from "./settings-storage";
 import { getPageTheme } from "./theme";
 import type { CoinResult, ControlPanelLayout, PlayerMode } from "./types";
-
-type ViewportSize = {
-  width: number;
-  height: number;
-};
-
-type ViewTransitionDocument = Document & {
-  startViewTransition?: (updateCallback: () => void) => void;
-};
-
-/**
- * 現在のビューポートサイズを購読する。
- *
- * @returns 最新のビューポート幅と高さ。
- */
-function useViewportSize(): ViewportSize {
-  const [viewport, setViewport] = useState<ViewportSize>({ width: 390, height: 844 });
-
-  useEffect(() => {
-    const update = (): void =>
-      setViewport({ width: window.innerWidth, height: window.innerHeight });
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("orientationchange", update);
-    return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("orientationchange", update);
-    };
-  }, []);
-
-  return viewport;
-}
+import { useViewportSize } from "./use-viewport-size";
+import { animateLayoutChange } from "./view-transition";
 
 /**
  * プレイヤー数と効果欄の状態から、ページ全体の行構成を返す。
@@ -59,23 +28,6 @@ function getGridRows(playerMode: PlayerMode, showCardText: boolean): string {
   return showCardText
     ? "grid-rows-[minmax(0,1fr)_auto]"
     : "grid-rows-[auto_auto] content-center";
-}
-
-/**
- * レイアウト変化をブラウザのView Transitionで滑らかに反映する。
- *
- * @param update DOMに反映したいReact state更新。
- */
-function animateLayoutChange(update: () => void): void {
-  const transitionDocument = document as ViewTransitionDocument;
-  if (typeof transitionDocument.startViewTransition !== "function") {
-    update();
-    return;
-  }
-
-  transitionDocument.startViewTransition(() => {
-    flushSync(update);
-  });
 }
 
 /**
