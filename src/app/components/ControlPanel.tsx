@@ -23,6 +23,8 @@ type ControlPanelProps = {
   coinTossId: number;
   /** 1人用と2人用を切り替える。 */
   onTogglePlayerMode: () => void;
+  /** エネルギーとランダム結果を初期化する。 */
+  onResetGame: () => void;
   /** 明色と暗色を切り替える。 */
   onToggleDark: () => void;
   /** 効果欄を開閉する。 */
@@ -96,7 +98,7 @@ function RandomToolButton(props: RandomToolButtonProps): ReactElement {
       <button
         data-testid={testid}
         onClick={onClick}
-        className={`control-pressable focus-ring h-8 w-16 shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] ${fontSizeClass} font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${rollId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
+        className={`control-pressable focus-ring h-8 w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] ${fontSizeClass} font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${rollId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
         aria-label={ariaLabel}
         title={title}
       >
@@ -130,6 +132,7 @@ export function ControlPanel({
   diceRollId,
   coinTossId,
   onTogglePlayerMode,
+  onResetGame,
   onToggleDark,
   onToggleCardText,
   onCycleSkin,
@@ -140,9 +143,13 @@ export function ControlPanel({
   const isHorizontal = layout === "horizontal";
   const panelDirectionClass = isHorizontal ? "flex-row" : "portrait:flex-row landscape:flex-col";
   const controlButtonClass = isHorizontal ? "" : "landscape:w-full";
-  const diceCoinWrapperClass = isHorizontal ? "w-16" : "w-16 landscape:w-full";
+  const wideActionWrapperClass = isHorizontal
+    ? "w-[clamp(2.5rem,14vw,4rem)]"
+    : "w-[clamp(2.5rem,14vw,4rem)] landscape:w-full";
+  const diceCoinWrapperClass = wideActionWrapperClass;
+  const resetWrapperClass = wideActionWrapperClass;
   const themeWrapperClass = isHorizontal ? "w-10" : "w-10 landscape:w-full";
-  const skinWrapperClass = isHorizontal ? "w-16" : "w-16 landscape:w-full";
+  const skinWrapperClass = wideActionWrapperClass;
 
   return (
     <div
@@ -159,6 +166,19 @@ export function ControlPanel({
           {isDouble ? "1人" : "2人"}
         </span>
       </button>
+      <div className={`${resetWrapperClass} shrink-0 flex items-center justify-center`}>
+        <button
+          data-testid="reset-game"
+          onClick={onResetGame}
+          className={`control-pressable focus-ring h-8 w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-base font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${controlBg}`}
+          aria-label="エネルギーとランダム結果をリセットする"
+          title="リセット"
+        >
+          <span className="control-value-pop" aria-hidden="true">
+            ↺
+          </span>
+        </button>
+      </div>
       <RandomToolButton
         testid="dice-roll"
         rollId={diceRollId}
@@ -199,7 +219,7 @@ export function ControlPanel({
         <button
           data-testid="skin-toggle"
           onClick={onCycleSkin}
-          className={`control-pressable focus-ring h-8 w-16 shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${controlBg}`}
+          className={`control-pressable focus-ring h-8 w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${controlBg}`}
           aria-label={`デザインを切り替える（現在 ${SKIN_LABEL[skin]}）`}
           title="デザイン切替"
         >

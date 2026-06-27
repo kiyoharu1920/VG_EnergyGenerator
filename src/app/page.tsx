@@ -79,6 +79,15 @@ export default function Home(): ReactElement {
     setCoinResult(Math.random() < 0.5 ? "表" : "裏");
     setCoinTossId((current) => current + 1);
   };
+  /** エネルギー値とランダム結果を初期状態へ戻す。 */
+  const resetGame = (): void => {
+    setP1Energy(0);
+    setP2Energy(0);
+    setDiceResult(null);
+    setCoinResult(null);
+    setDiceRollId(0);
+    setCoinTossId(0);
+  };
   /** 効果欄の開閉に伴う大きなレイアウト変更だけ滑らかに切り替える。 */
   const toggleCardText = (): void =>
     animateLayoutChange(() =>
@@ -118,6 +127,7 @@ export default function Home(): ReactElement {
       diceRollId={diceRollId}
       coinTossId={coinTossId}
       onTogglePlayerMode={togglePlayerMode}
+      onResetGame={resetGame}
       onToggleDark={() =>
         writeStoredSettings({
           ...storedSettings,
