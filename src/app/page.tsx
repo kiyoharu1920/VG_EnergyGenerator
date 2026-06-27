@@ -7,9 +7,12 @@ import { EnergyGauge, CELL_DEFAULT, getResponsiveCellMax } from "./components/En
 import { EnergyTextCard } from "./components/EnergyTextCard";
 import { useStoredSettings, writeStoredSettings } from "./settings-storage";
 import { getPageTheme } from "./theme";
-import type { CoinResult, ControlPanelLayout, PlayerMode } from "./types";
+import type { CoinResult, ControlPanelLayout, DesignSkin, PlayerMode } from "./types";
 import { useViewportSize } from "./use-viewport-size";
 import { animateLayoutChange } from "./view-transition";
+
+/** デザイン切替ボタンで巡回する順序。 */
+const SKIN_ORDER: readonly DesignSkin[] = ["original", "tcg", "minimal", "led"];
 
 /**
  * プレイヤー数と効果欄の状態から、ページ全体の行構成を返す。
@@ -45,6 +48,7 @@ export default function Home(): ReactElement {
   const [coinTossId, setCoinTossId] = useState<number>(0);
   const storedSettings = useStoredSettings();
   const isDark = storedSettings.theme === "dark";
+  const skin = storedSettings.skin;
   const playerMode: PlayerMode = storedSettings.isTwoPlayer ? "double" : "single";
   const showCardText = storedSettings.showDescription;
   const viewport = useViewportSize();
@@ -54,7 +58,7 @@ export default function Home(): ReactElement {
   );
   const effectiveCellSize = Math.min(cellSize, maxCellSize);
 
-  const { rootBg } = getPageTheme(isDark);
+  const { rootBg } = getPageTheme();
   const isDouble = playerMode === "double";
   const gridRows = getGridRows(playerMode, showCardText);
 
@@ -84,6 +88,11 @@ export default function Home(): ReactElement {
         isTwoPlayer: !storedSettings.isTwoPlayer,
       })
     );
+  /** デザインスキンを次の候補へ巡回させる。 */
+  const cycleSkin = (): void => {
+    const nextIndex = (SKIN_ORDER.indexOf(skin) + 1) % SKIN_ORDER.length;
+    writeStoredSettings({ ...storedSettings, skin: SKIN_ORDER[nextIndex] });
+  };
 
   /**
    * 配置場所ごとの向きで中央操作バーを描画する。
@@ -96,6 +105,7 @@ export default function Home(): ReactElement {
       isDouble={isDouble}
       isDark={isDark}
       showCardText={showCardText}
+      skin={skin}
       diceResult={diceResult}
       coinResult={coinResult}
       diceRollId={diceRollId}
@@ -108,13 +118,18 @@ export default function Home(): ReactElement {
         })
       }
       onToggleCardText={toggleCardText}
+      onCycleSkin={cycleSkin}
       onRollDice={rollDice}
       onTossCoin={tossCoin}
     />
   );
 
   return (
-    <div className={`fixed inset-0 overflow-hidden transition-colors ${rootBg} flex justify-center`}>
+    <div
+      data-skin={skin}
+      data-theme={isDark ? "dark" : "light"}
+      className={`fixed inset-0 overflow-hidden transition-colors ${rootBg} flex justify-center`}
+    >
       <div
         className={`w-full max-w-3xl h-full grid ${gridRows} items-stretch p-[2vmin] box-border gap-[2vmin]`}
       >
@@ -124,7 +139,6 @@ export default function Home(): ReactElement {
             energy={p2Energy}
             onEnergyChange={setP2Energy}
             rotate
-            isDark={isDark}
             cellSize={effectiveCellSize}
             maxCellSize={maxCellSize}
             onCellSizeChange={setCellSize}
@@ -139,14 +153,14 @@ export default function Home(): ReactElement {
             >
               {!isDouble && renderControlPanel("horizontal")}
               {isDouble && (
-                <EnergyTextCard rotate isDark={isDark} className="border-red-500/30" />
+                <EnergyTextCard rotate className="border-[var(--p2-card-border)]" />
               )}
               {isDouble && (
                 <div className="portrait:w-full landscape:w-[clamp(96px,18vw,148px)] shrink-0 flex items-center justify-center">
                   {renderControlPanel("responsive")}
                 </div>
               )}
-              <EnergyTextCard isDark={isDark} className="border-blue-500/30" />
+              <EnergyTextCard className="border-[var(--p1-card-border)]" />
             </div>
           )}
           {!showCardText && renderControlPanel("horizontal")}
@@ -157,7 +171,6 @@ export default function Home(): ReactElement {
           energy={p1Energy}
           onEnergyChange={setP1Energy}
           rotate={false}
-          isDark={isDark}
           cellSize={effectiveCellSize}
           maxCellSize={maxCellSize}
           onCellSizeChange={setCellSize}

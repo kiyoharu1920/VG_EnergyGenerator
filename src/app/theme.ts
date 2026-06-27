@@ -15,38 +15,37 @@ type PageTheme = {
 };
 
 /**
- * プレイヤーとテーマからゲージ配色クラスを返す。
+ * プレイヤー別のゲージ配色クラスを返す。
+ *
+ * 実際の色は globals.css のスキン別CSS変数が供給する。
+ * ここはどの変数を参照するかだけを決める。
  *
  * @param player 対象プレイヤー。
- * @param isDark 暗色テーマかどうか。
  * @returns ゲージに使うTailwindクラス群。
  */
-export function getGaugeTheme(player: Player, isDark: boolean): GaugeTheme {
+export function getGaugeTheme(player: Player): GaugeTheme {
+  const isP1 = player === "p1";
   return {
-    accentBorder: player === "p1" ? "border-blue-400/50" : "border-red-400/50",
-    panelBg: player === "p1"
-      ? isDark ? "bg-blue-950/50" : "bg-blue-50"
-      : isDark ? "bg-red-950/50" : "bg-red-50",
-    cellBorder: isDark ? "border-slate-600" : "border-slate-300",
-    cellDivider: isDark ? "border-slate-600/50" : "border-slate-300/70",
-    resizeHandleColor: isDark ? "bg-slate-500" : "bg-slate-300",
+    accentBorder: isP1 ? "border-[var(--p1-accent)]" : "border-[var(--p2-accent)]",
+    panelBg: isP1 ? "bg-[var(--p1-panel-bg)]" : "bg-[var(--p2-panel-bg)]",
+    cellBorder: "border-[var(--cell-border)]",
+    cellDivider: "border-[var(--cell-divider)]",
+    resizeHandleColor: "bg-[var(--handle-bg)]",
   };
 }
 
 /**
  * ページと操作バーに使うテーマクラスを返す。
  *
- * @param isDark 暗色テーマかどうか。
+ * 実際の色は globals.css のスキン別CSS変数が供給する。
+ *
  * @returns ページ背景と操作バーのTailwindクラス群。
  */
-export function getPageTheme(isDark: boolean): PageTheme {
+export function getPageTheme(): PageTheme {
   return {
-    rootBg: isDark ? "bg-slate-950" : "bg-slate-100",
-    controlBg: isDark
-      ? "bg-slate-700 hover:bg-slate-600 text-white border-slate-500"
-      : "bg-white hover:bg-slate-200 text-slate-700 border-slate-200 shadow-md",
-    centerBg: isDark
-      ? "bg-slate-900/70 border-slate-700"
-      : "bg-white/90 border-slate-200",
+    rootBg: "bg-[var(--page-bg)]",
+    controlBg:
+      "bg-[var(--control-bg)] text-[var(--control-text)] border-[var(--control-border)] hover:bg-[var(--control-hover-bg)]",
+    centerBg: "bg-[var(--center-bg)] border-[var(--center-border)]",
   };
 }

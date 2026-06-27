@@ -1,9 +1,12 @@
 import type { ReactElement } from "react";
 import { ENERGY_MAX } from "./energyGaugeConstants";
+import type { Player } from "../types";
 
 type StepButton = readonly [delta: number, colorClass: string];
 
 type StepButtonsProps = {
+  /** 操作対象プレイヤー。aria-labelの文脈に使う。 */
+  player: Player;
   /** 現在のエネルギー値。 */
   energy: number;
   /** エネルギー値を更新する。 */
@@ -16,29 +19,14 @@ type StepButtonsProps = {
   btnFontSize: number;
 };
 
-/** エネルギー増減ボタン。色はカードゲームの増減方向が見分けやすい順に固定する。 */
-const STEP_BUTTONS: StepButton[] = [
-  [
-    -7,
-    "bg-violet-700 hover:bg-violet-600 active:bg-violet-500 shadow-lg shadow-violet-900/50",
-  ],
-  [
-    -3,
-    "bg-blue-700 hover:bg-blue-600 active:bg-blue-500 shadow-lg shadow-blue-900/50",
-  ],
-  [
-    -1,
-    "bg-blue-500 hover:bg-blue-400 active:bg-blue-300 shadow-md shadow-blue-700/50",
-  ],
-  [
-    +1,
-    "bg-rose-500 hover:bg-rose-400 active:bg-rose-300 shadow-md shadow-rose-700/50",
-  ],
-  [
-    +3,
-    "bg-rose-700 hover:bg-rose-600 active:bg-rose-500 shadow-lg shadow-rose-900/50",
-  ],
-];
+/** エネルギー増減ボタン。色はカードゲームの増減方向が見分けやすい順に固定する。実際の色はスキン別CSS変数が供給する。 */
+const STEP_BUTTONS = [
+  [-7, "bg-[var(--step-dec3)]"],
+  [-3, "bg-[var(--step-dec2)]"],
+  [-1, "bg-[var(--step-dec1)]"],
+  [+1, "bg-[var(--step-inc1)]"],
+  [+3, "bg-[var(--step-inc2)]"],
+] as const satisfies readonly StepButton[];
 
 function clampEnergy(value: number): number {
   return Math.max(0, Math.min(ENERGY_MAX, value));
@@ -47,28 +35,32 @@ function clampEnergy(value: number): number {
 /**
  * エネルギー増減ボタン行を表示する。
  *
- * @param props エネルギー値、更新関数、ボタン寸法。
+ * @param props プレイヤー、エネルギー値、更新関数、ボタン寸法。
  * @returns 増減ボタン行。
  */
 export function StepButtons({
+  player,
   energy,
   onEnergyChange,
   btnHeight,
   btnPx,
   btnFontSize,
 }: StepButtonsProps): ReactElement {
+  const label = player === "p1" ? "P1" : "P2";
   return (
     <div className="grid grid-cols-5 gap-1 sm:gap-2 w-full pb-1">
       {STEP_BUTTONS.map(([d, cls]) => (
         <button
           key={d}
-          className={`min-w-0 flex items-center justify-center text-white rounded-full select-none font-bold transition-all active:scale-95 ${cls}`}
+          type="button"
+          className={`step-btn focus-ring min-w-0 flex items-center justify-center text-[var(--step-text)] rounded-full select-none font-bold transition-all active:scale-95 ${cls}`}
           style={{
             height: btnHeight,
             paddingInline: btnPx,
             fontSize: btnFontSize,
           }}
           onClick={() => onEnergyChange(clampEnergy(energy + d))}
+          aria-label={`${label} エネルギーを${Math.abs(d)}${d > 0 ? "増やす" : "減らす"}`}
         >
           {d > 0 ? `+${d}` : d}
         </button>

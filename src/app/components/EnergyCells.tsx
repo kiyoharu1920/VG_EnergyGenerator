@@ -13,8 +13,6 @@ type EnergyCellsProps = {
   onEnergyChange: (value: number) => void;
   /** 対面プレイヤー向けに180度回転するかどうか。 */
   rotate: boolean;
-  /** 暗色テーマかどうか。 */
-  isDark: boolean;
   /** セル高さ。 */
   cellSize: number;
   /** セル内の文字サイズ。 */
@@ -25,16 +23,14 @@ type EnergyCellsProps = {
   cellDivider: string;
 };
 
-function getCellClasses(
-  index: number,
-  energy: number,
-  isDark: boolean,
-): string {
-  if (index === energy) return "bg-emerald-400 text-slate-900";
-  if (index < energy) return "bg-cyan-500/80 text-slate-900";
-  return isDark
-    ? "bg-slate-800/60 text-slate-500"
-    : "bg-slate-200 text-slate-400";
+/** プレイヤーの日本語表示名。aria-labelに使う。 */
+const PLAYER_LABEL: Record<Player, string> = { p1: "P1", p2: "P2" };
+
+/** セルの状態（選択中／以下／空）に応じた配色クラスを返す。実際の色はスキン別CSS変数が供給する。 */
+function getCellClasses(index: number, energy: number): string {
+  if (index === energy) return "bg-[var(--cell-on-bg)] text-[var(--cell-on-text)]";
+  if (index < energy) return "bg-[var(--cell-fill-bg)] text-[var(--cell-fill-text)]";
+  return "bg-[var(--cell-empty-bg)] text-[var(--cell-empty-text)]";
 }
 
 function getIndexFromPointer(
@@ -61,7 +57,6 @@ export function EnergyCells({
   energy,
   onEnergyChange,
   rotate,
-  isDark,
   cellSize,
   cellFontSize,
   cellBorder,
@@ -69,22 +64,31 @@ export function EnergyCells({
 }: EnergyCellsProps): ReactElement {
   const cellsRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
+  /** 最後にemitしたエネルギー値。同値の連続更新を抑止する。 */
+  const lastEmitted = useRef<number>(-1);
+
+  /** 同値なら更新をスキップし、変化時だけ親へ通知する。 */
+  const emitEnergy = (value: number): void => {
+    if (value === lastEmitted.current) return;
+    lastEmitted.current = value;
+    onEnergyChange(value);
+  };
 
   /** セル列の押下開始時に、押した位置のエネルギーへ変更する。 */
   const handlePointerDown = (e: PointerEvent<HTMLDivElement>): void => {
+    // 主ポインターの左ボタンのみ受け付け、副ボタン・複数タッチの誤操作を防ぐ。
+    if (!e.isPrimary || e.button !== 0) return;
     isDragging.current = true;
     const el = cellsRef.current;
     if (!el) return;
     setPointerCaptureSafely(el, e.pointerId);
-    onEnergyChange(
-      getIndexFromPointer(e.clientX, el.getBoundingClientRect(), rotate),
-    );
+    emitEnergy(getIndexFromPointer(e.clientX, el.getBoundingClientRect(), rotate));
   };
 
   /** セル列をドラッグ中だけ、ポインター位置に合わせてエネルギーを更新する。 */
   const handlePointerMove = (e: PointerEvent<HTMLDivElement>): void => {
     if (!isDragging.current || !cellsRef.current) return;
-    onEnergyChange(
+    emitEnergy(
       getIndexFromPointer(
         e.clientX,
         cellsRef.current.getBoundingClientRect(),
@@ -96,12 +100,15 @@ export function EnergyCells({
   /** セル列のドラッグ状態を解除する。 */
   const handlePointerUp = (): void => {
     isDragging.current = false;
+    lastEmitted.current = -1;
   };
 
   return (
     <div
       ref={cellsRef}
       data-testid={`${player}-cells`}
+      role="radiogroup"
+      aria-label={`${PLAYER_LABEL[player]} エネルギー量`}
       className={`w-full flex border ${cellBorder} rounded-xl overflow-hidden touch-none`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -113,13 +120,14 @@ export function EnergyCells({
         <button
           key={i}
           type="button"
-          className={`flex-1 min-w-0 font-bold flex items-center justify-center border-r ${cellDivider} text-center select-none transition-colors ${getCellClasses(i, energy, isDark)}`}
+          role="radio"
+          className={`focus-ring relative flex-1 min-w-0 font-bold flex items-center justify-center border-r ${cellDivider} text-center select-none transition-colors ${getCellClasses(i, energy)}`}
           style={{ height: cellSize, fontSize: cellFontSize }}
           onClick={(e) => {
             if (e.detail === 0) onEnergyChange(i);
           }}
-          aria-label={`${player} energy ${i}`}
-          aria-pressed={i === energy}
+          aria-label={`${PLAYER_LABEL[player]} エネルギー ${i}`}
+          aria-checked={i === energy}
         >
           {i}
         </button>

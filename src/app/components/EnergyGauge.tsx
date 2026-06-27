@@ -25,8 +25,6 @@ type EnergyGaugeProps = {
   onEnergyChange: (value: number) => void;
   /** 対面プレイヤー向けに180度回転するかどうか。 */
   rotate: boolean;
-  /** 暗色テーマかどうか。 */
-  isDark: boolean;
   /** セル高さ。 */
   cellSize: number;
   /** 画面内に収まるセル高さの上限。 */
@@ -78,7 +76,7 @@ export function getResponsiveCellMax(
 /**
  * エネルギー値の表示、タップ/ドラッグ変更、増減ボタン、サイズ変更を扱うゲージ。
  *
- * @param props プレイヤー、エネルギー値、テーマ、サイズ制御。
+ * @param props プレイヤー、エネルギー値、サイズ制御。
  * @returns エネルギー操作パネル。
  */
 export function EnergyGauge({
@@ -86,14 +84,13 @@ export function EnergyGauge({
   energy,
   onEnergyChange,
   rotate,
-  isDark,
   cellSize,
   maxCellSize,
   onCellSizeChange,
   resizeHandlePosition = "top",
 }: EnergyGaugeProps): ReactElement {
   const { accentBorder, panelBg, cellBorder, cellDivider, resizeHandleColor } =
-    getGaugeTheme(player, isDark);
+    getGaugeTheme(player);
   const { btnHeight, btnPx, btnFontSize, cellFontSize } =
     calcCellMetrics(cellSize);
   const resizeHandle: ReactElement = (
@@ -122,7 +119,6 @@ export function EnergyGauge({
           energy={energy}
           onEnergyChange={onEnergyChange}
           rotate={rotate}
-          isDark={isDark}
           cellSize={cellSize}
           cellFontSize={cellFontSize}
           cellBorder={cellBorder}
@@ -131,6 +127,7 @@ export function EnergyGauge({
 
         {/* 操作ボタン行: 5列固定で小幅端末の横はみ出しを防ぐ */}
         <StepButtons
+          player={player}
           energy={energy}
           onEnergyChange={onEnergyChange}
           btnHeight={btnHeight}

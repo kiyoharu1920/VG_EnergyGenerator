@@ -14,29 +14,24 @@ const energyGeneratorText = `《エネルギージェネレーター/Energy Gene
 type EnergyTextCardProps = {
   /** 対面プレイヤー向けに180度回転するかどうか。 */
   rotate?: boolean;
-  /** 暗色テーマかどうか。 */
-  isDark: boolean;
   /** プレイヤー別の枠色などを追加するクラス。 */
   className?: string;
 };
 
 /**
- * エネルギージェネレーターの効果欄。
+ * エネルギージェネレーターの効果欄。色はスキン別CSS変数が供給する。
  *
- * @param props 表示方向、テーマ、追加クラス。
+ * @param props 表示方向、追加クラス。
  * @returns 効果テキストカード。
  */
 export function EnergyTextCard({
   rotate = false,
-  isDark,
   className = "",
 }: EnergyTextCardProps): ReactElement {
-  const cardBg = isDark
-    ? "bg-slate-900/80 text-slate-300"
-    : "bg-white text-slate-700";
   return (
     <pre
-      className={`no-scrollbar whitespace-pre-wrap border p-[clamp(4px,1.2vmin,16px)] text-[clamp(9px,1.8vmin,20px)] leading-relaxed flex-1 overflow-auto rounded-2xl transition-colors ${cardBg} ${rotate ? "rotate-180" : ""} ${className}`}
+      aria-label="エネルギージェネレーターの効果"
+      className={`no-scrollbar whitespace-pre-wrap border p-[clamp(4px,1.2vmin,16px)] text-[clamp(9px,1.8vmin,20px)] leading-relaxed flex-1 overflow-auto rounded-2xl transition-colors bg-[var(--card-bg)] text-[var(--card-text)] ${rotate ? "rotate-180" : ""} ${className}`}
     >
       {energyGeneratorText}
     </pre>

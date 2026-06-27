@@ -1,12 +1,28 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import type { DesignSkin } from "./types";
 
 export type StoredSettings = {
   isTwoPlayer: boolean;
   theme: "light" | "dark";
   showDescription: boolean;
+  skin: DesignSkin;
 };
+
+const DESIGN_SKINS: readonly DesignSkin[] = [
+  "original",
+  "tcg",
+  "minimal",
+  "led",
+];
+
+/** 不明値は元デザインへ寄せて、旧保存データとも後方互換にする。 */
+function normalizeSkin(value: unknown): DesignSkin {
+  return DESIGN_SKINS.includes(value as DesignSkin)
+    ? (value as DesignSkin)
+    : "original";
+}
 
 /** UI設定をlocalStorageへ保存するキー。 */
 const SETTINGS_STORAGE_KEY = "vg-energy-generator:settings:v1";
@@ -18,6 +34,7 @@ const DEFAULT_SETTINGS: StoredSettings = {
   isTwoPlayer: true,
   theme: "light",
   showDescription: true,
+  skin: "original",
 };
 
 let inMemorySettings: StoredSettings = DEFAULT_SETTINGS;
@@ -55,6 +72,7 @@ function readStoredSettings(): StoredSettings | null {
       isTwoPlayer: settings.isTwoPlayer,
       theme: settings.theme,
       showDescription: settings.showDescription,
+      skin: normalizeSkin(settings.skin),
     };
     return cachedStoredSettings;
   } catch {
