@@ -152,11 +152,11 @@ export function ControlPanel({
       <button
         data-testid="player-mode-toggle"
         onClick={onTogglePlayerMode}
-        className={`control-pressable focus-ring h-8 min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-2 text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.97] ${controlBg}`}
+        className={`control-pressable focus-ring h-8 min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.97] ${controlBg}`}
         aria-label={isDouble ? "1人用へ切り替える" : "2人用へ切り替える"}
       >
-        <span key={isDouble ? "double" : "single"} className="control-value-pop">
-          {isDouble ? "1人用へ" : "2人用へ"}
+        <span key={isDouble ? "double" : "single"} className="control-value-pop whitespace-nowrap">
+          {isDouble ? "1人" : "2人"}
         </span>
       </button>
       <RandomToolButton
@@ -211,11 +211,13 @@ export function ControlPanel({
       <button
         data-testid="card-text-toggle"
         onClick={onToggleCardText}
-        className={`control-pressable focus-ring h-8 min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-2 text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.97] ${controlBg}`}
+        className={`control-pressable focus-ring h-8 min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.97] ${controlBg}`}
         aria-expanded={showCardText}
+        aria-label={showCardText ? "効果欄を閉じる" : "効果欄を開く"}
+        title={showCardText ? "効果欄を閉じる" : "効果欄を開く"}
       >
-        <span key={showCardText ? "open" : "closed"} className="control-value-pop">
-          {showCardText ? "効果欄を閉じる" : "効果欄を開く"}
+        <span key={showCardText ? "open" : "closed"} className="control-value-pop whitespace-nowrap">
+          {showCardText ? "閉" : "開"}
         </span>
       </button>
     </div>
