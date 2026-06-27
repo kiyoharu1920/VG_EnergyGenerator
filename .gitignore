@@ -21,6 +21,7 @@ AGENTS.md
 
 # testing
 /coverage/
+/outputs/
 
 # next.js
 /.next/
