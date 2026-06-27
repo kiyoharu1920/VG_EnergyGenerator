@@ -31,7 +31,7 @@ export function EnergyTextCard({
   return (
     <pre
       aria-label="エネルギージェネレーターの効果"
-      className={`no-scrollbar whitespace-pre-wrap border p-[clamp(4px,1.2vmin,16px)] text-[clamp(9px,1.8vmin,20px)] leading-relaxed flex-1 overflow-auto rounded-2xl transition-colors bg-[var(--card-bg)] text-[var(--card-text)] ${rotate ? "rotate-180" : ""} ${className}`}
+      className={`no-scrollbar whitespace-pre-wrap [border-width:var(--border-w)] p-[clamp(4px,1.2vmin,16px)] text-[clamp(9px,1.8vmin,20px)] leading-relaxed flex-1 overflow-auto rounded-[var(--radius-card)] shadow-[var(--panel-shadow)] transition-colors bg-[var(--card-bg)] text-[var(--card-text)] ${rotate ? "rotate-180" : ""} ${className}`}
     >
       {energyGeneratorText}
     </pre>

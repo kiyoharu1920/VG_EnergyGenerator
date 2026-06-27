@@ -26,10 +26,12 @@ type EnergyCellsProps = {
 /** プレイヤーの日本語表示名。aria-labelに使う。 */
 const PLAYER_LABEL: Record<Player, string> = { p1: "P1", p2: "P2" };
 
-/** セルの状態（選択中／以下／空）に応じた配色クラスを返す。実際の色はスキン別CSS変数が供給する。 */
+/** セルの状態（選択中／以下／空）に応じた配色・発光クラスを返す。実際の値はスキン別CSS変数が供給する。 */
 function getCellClasses(index: number, energy: number): string {
-  if (index === energy) return "bg-[var(--cell-on-bg)] text-[var(--cell-on-text)]";
-  if (index < energy) return "bg-[var(--cell-fill-bg)] text-[var(--cell-fill-text)]";
+  if (index === energy)
+    return "bg-[var(--cell-on-bg)] text-[var(--cell-on-text)] shadow-[var(--cell-on-glow)]";
+  if (index < energy)
+    return "bg-[var(--cell-fill-bg)] text-[var(--cell-fill-text)] shadow-[var(--cell-fill-glow)]";
   return "bg-[var(--cell-empty-bg)] text-[var(--cell-empty-text)]";
 }
 
@@ -109,7 +111,7 @@ export function EnergyCells({
       data-testid={`${player}-cells`}
       role="radiogroup"
       aria-label={`${PLAYER_LABEL[player]} エネルギー量`}
-      className={`w-full flex border ${cellBorder} rounded-xl overflow-hidden touch-none`}
+      className={`w-full flex [border-width:var(--border-w)] ${cellBorder} rounded-[var(--radius-cellbox)] overflow-hidden touch-none bg-[var(--cells-track)] p-[var(--cells-pad)] gap-[var(--cell-gap)]`}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -121,7 +123,7 @@ export function EnergyCells({
           key={i}
           type="button"
           role="radio"
-          className={`focus-ring relative flex-1 min-w-0 font-bold flex items-center justify-center border-r ${cellDivider} text-center select-none transition-colors ${getCellClasses(i, energy)}`}
+          className={`focus-ring relative flex-1 min-w-0 font-bold flex items-center justify-center border-r ${cellDivider} rounded-[var(--radius-cell)] text-center select-none transition-colors ${getCellClasses(i, energy)}`}
           style={{ height: cellSize, fontSize: cellFontSize }}
           onClick={(e) => {
             if (e.detail === 0) onEnergyChange(i);

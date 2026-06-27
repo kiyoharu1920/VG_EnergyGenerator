@@ -20,13 +20,14 @@ body {
 
 /* ───────────────────────────────────────────────
    デザインスキン
-   各スキンはCSS変数のみで色を定義する。
-   ルート要素の data-skin / data-theme で切り替わり、
-   配下のコンポーネントは var() 参照で色を受け取る。
+   色だけでなく形状（角丸・枠・影・セル間隔・質感）も
+   CSS変数で定義する。ルート要素の data-skin / data-theme で
+   切り替わり、配下のコンポーネントは var() 参照で受け取る。
    既定（original / light）の値は :root に置く。
    ─────────────────────────────────────────────── */
 :root {
   --app-font: var(--font-sans);
+  /* 色 */
   --page-bg: #f1f5f9; /* slate-100 */
   --p1-panel-bg: #eff6ff; /* blue-50 */
   --p1-accent: rgba(96, 165, 250, 0.5); /* blue-400/50 */
@@ -41,7 +42,7 @@ body {
   --cell-fill-bg: rgba(6, 182, 212, 0.8); /* cyan-500/80 */
   --cell-fill-text: #0f172a;
   --cell-empty-bg: #e2e8f0; /* slate-200 */
-  --cell-empty-text: #64748b; /* slate-500 (コントラスト改善) */
+  --cell-empty-text: #64748b; /* slate-500 */
   --step-dec3: #6d28d9; /* violet-700 (-7) */
   --step-dec2: #1d4ed8; /* blue-700 (-3) */
   --step-dec1: #3b82f6; /* blue-500 (-1) */
@@ -57,9 +58,27 @@ body {
   --handle-bg: #cbd5e1;
   --card-bg: #ffffff;
   --card-text: #334155;
+  /* 形状 */
+  --radius-panel: 1rem;
+  --radius-cellbox: 0.75rem;
+  --radius-cell: 0px;
+  --radius-btn: 9999px;
+  --radius-control: 0.5rem;
+  --radius-card: 1rem;
+  --radius-handle: 9999px;
+  --border-w: 1px;
+  --cells-pad: 0px;
+  --cell-gap: 0px;
+  --cells-track: transparent;
+  --panel-shadow: none;
+  --btn-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+  --control-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --cell-on-glow: 0 0 #0000;
+  --cell-fill-glow: 0 0 #0000;
+  --letter-spacing: normal;
 }
 
-/* 元デザイン・暗色 */
+/* 元デザイン・暗色（形状は :root を継承し、色のみ上書き） */
 [data-skin="original"][data-theme="dark"] {
   --page-bg: #020617; /* slate-950 */
   --p1-panel-bg: rgba(23, 37, 84, 0.5); /* blue-950/50 */
@@ -79,18 +98,18 @@ body {
   --card-text: #cbd5e1;
 }
 
-/* 案A: TCG卓上マテリアル（盤面・金・カード質感） */
+/* 案A: TCG卓上マテリアル（盤面・金枠・カード質感・重厚な影） */
 [data-skin="tcg"] {
   --app-font: var(--font-sans);
   --page-bg: #0f0b07;
   --p1-panel-bg: #17120c;
-  --p1-accent: rgba(120, 162, 210, 0.45);
+  --p1-accent: rgba(190, 150, 70, 0.55);
   --p1-card-border: rgba(120, 162, 210, 0.4);
   --p2-panel-bg: #17120c;
-  --p2-accent: rgba(210, 140, 116, 0.45);
+  --p2-accent: rgba(190, 150, 70, 0.55);
   --p2-card-border: rgba(210, 140, 116, 0.4);
-  --cell-border: #3a2e1c;
-  --cell-divider: rgba(58, 46, 28, 0.8);
+  --cell-border: #6b5526;
+  --cell-divider: transparent;
   --cell-on-bg: #f0d24e;
   --cell-on-text: #3a2c08;
   --cell-fill-bg: #caa42b;
@@ -105,27 +124,45 @@ body {
   --step-text: #f5ead0;
   --control-bg: #241c12;
   --control-text: #d8c9a0;
-  --control-border: #4a3a24;
+  --control-border: #5a4528;
   --control-hover-bg: #30261a;
   --center-bg: #1c1610;
-  --center-border: #3a2e1c;
-  --handle-bg: #5c4a2e;
+  --center-border: #5a4528;
+  --handle-bg: #8a6d3b;
   --card-bg: #1a140c;
   --card-text: #cdbb98;
+  /* 形状: 角丸控えめ・太い金枠・深い影・セル間隔 */
+  --radius-panel: 0.5rem;
+  --radius-cellbox: 0.5rem;
+  --radius-cell: 4px;
+  --radius-btn: 6px;
+  --radius-control: 6px;
+  --radius-card: 0.5rem;
+  --radius-handle: 2px;
+  --border-w: 2px;
+  --cells-pad: 4px;
+  --cell-gap: 3px;
+  --cells-track: #0b0805;
+  --panel-shadow: 0 10px 24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(240, 210, 120, 0.12);
+  --btn-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --control-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
+  --cell-on-glow: inset 0 1px 0 rgba(255, 248, 200, 0.5);
+  --cell-fill-glow: inset 0 1px 0 rgba(255, 244, 180, 0.35);
+  --letter-spacing: 0.02em;
 }
 
-/* 案B: ミニマル機能特化（余白・単色・数字主役） */
+/* 案B: ミニマル機能特化（余白・極薄枠・影なし・フラット） */
 [data-skin="minimal"] {
   --app-font: var(--font-sans);
   --page-bg: #fbfbfa;
   --p1-panel-bg: #ffffff;
-  --p1-accent: #e4e4e1;
-  --p1-card-border: #e4e4e1;
+  --p1-accent: #ededea;
+  --p1-card-border: #ededea;
   --p2-panel-bg: #ffffff;
-  --p2-accent: #e4e4e1;
-  --p2-card-border: #e4e4e1;
+  --p2-accent: #ededea;
+  --p2-card-border: #ededea;
   --cell-border: #e4e4e1;
-  --cell-divider: #ededea;
+  --cell-divider: transparent;
   --cell-on-bg: #16a34a;
   --cell-on-text: #ffffff;
   --cell-fill-bg: #4ade80;
@@ -143,24 +180,42 @@ body {
   --control-border: #dcdcd8;
   --control-hover-bg: #f1f1ef;
   --center-bg: #ffffff;
-  --center-border: #e4e4e1;
+  --center-border: #ededea;
   --handle-bg: #d4d4d0;
   --card-bg: #ffffff;
   --card-text: #44443f;
+  /* 形状: ほぼ角・極薄枠・影ゼロ・広めのセル間隔 */
+  --radius-panel: 4px;
+  --radius-cellbox: 4px;
+  --radius-cell: 3px;
+  --radius-btn: 6px;
+  --radius-control: 6px;
+  --radius-card: 4px;
+  --radius-handle: 2px;
+  --border-w: 1px;
+  --cells-pad: 0px;
+  --cell-gap: 4px;
+  --cells-track: transparent;
+  --panel-shadow: none;
+  --btn-shadow: none;
+  --control-shadow: none;
+  --cell-on-glow: 0 0 #0000;
+  --cell-fill-glow: 0 0 #0000;
+  --letter-spacing: 0.01em;
 }
 
-/* 案C: レトロLED計器（黒地・セグメント・メカ枠） */
+/* 案C: レトロLED計器（黒地・角ばり・メカ枠・セグメント・発光） */
 [data-skin="led"] {
   --app-font: var(--font-mono);
   --page-bg: #08090b;
   --p1-panel-bg: #0c0d0f;
-  --p1-accent: rgba(43, 74, 107, 0.8);
+  --p1-accent: rgba(43, 74, 107, 0.9);
   --p1-card-border: rgba(43, 74, 107, 0.7);
   --p2-panel-bg: #0c0d0f;
-  --p2-accent: rgba(107, 43, 43, 0.8);
+  --p2-accent: rgba(107, 43, 43, 0.9);
   --p2-card-border: rgba(107, 43, 43, 0.7);
-  --cell-border: #1c2026;
-  --cell-divider: #161a1f;
+  --cell-border: #2b2f36;
+  --cell-divider: transparent;
   --cell-on-bg: #39e07a;
   --cell-on-text: #04140a;
   --cell-fill-bg: #1f9a52;
@@ -182,11 +237,30 @@ body {
   --handle-bg: #2b4a6b;
   --card-bg: #0c0d0f;
   --card-text: #8fb9cf;
+  /* 形状: 角ばり・太いメカ枠・黒い溝・発光セグメント */
+  --radius-panel: 3px;
+  --radius-cellbox: 4px;
+  --radius-cell: 2px;
+  --radius-btn: 3px;
+  --radius-control: 3px;
+  --radius-card: 3px;
+  --radius-handle: 1px;
+  --border-w: 2px;
+  --cells-pad: 5px;
+  --cell-gap: 4px;
+  --cells-track: #050606;
+  --panel-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8), 0 0 0 1px #000;
+  --btn-shadow: inset 0 0 0 1px rgba(120, 160, 200, 0.15);
+  --control-shadow: inset 0 0 0 1px rgba(120, 160, 200, 0.1);
+  --cell-on-glow: 0 0 8px 0 var(--cell-on-bg);
+  --cell-fill-glow: 0 0 5px 0 var(--cell-fill-bg);
+  --letter-spacing: 0.08em;
 }
 
-/* スキンのフォントを配下へ適用 */
+/* スキンのフォントと字間を配下へ適用 */
 [data-skin] {
   font-family: var(--app-font);
+  letter-spacing: var(--letter-spacing);
 }
 
 /* 増減ボタンの共通ホバー/アクティブ（スキン非依存・明度のみ変化） */

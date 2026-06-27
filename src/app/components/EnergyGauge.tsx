@@ -108,7 +108,7 @@ export function EnergyGauge({
   return (
     <div
       data-testid={`${player}-gauge`}
-      className={`flex flex-col items-center w-full rounded-2xl border gap-1 px-[clamp(10px,7vw,72px)] pb-2 pt-1 transition-colors ${panelBg} ${accentBorder} ${rotate ? "rotate-180" : ""}`}
+      className={`flex flex-col items-center w-full rounded-[var(--radius-panel)] [border-width:var(--border-w)] shadow-[var(--panel-shadow)] gap-1 px-[clamp(10px,7vw,72px)] pb-2 pt-1 transition-colors ${panelBg} ${accentBorder} ${rotate ? "rotate-180" : ""}`}
     >
       {resizeHandlePosition === "top" && resizeHandle}
 

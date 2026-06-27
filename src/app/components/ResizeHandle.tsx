@@ -78,7 +78,7 @@ export function ResizeHandle({
       onPointerCancel={handleResizeUp}
       onLostPointerCapture={handleResizeUp}
     >
-      <div className={`w-12 h-1 rounded-full ${handleColor}`} />
+      <div className={`w-12 h-1 rounded-[var(--radius-handle)] ${handleColor}`} />
     </div>
   );
 }

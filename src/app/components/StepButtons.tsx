@@ -53,7 +53,7 @@ export function StepButtons({
         <button
           key={d}
           type="button"
-          className={`step-btn focus-ring min-w-0 flex items-center justify-center text-[var(--step-text)] rounded-full select-none font-bold transition-all active:scale-95 ${cls}`}
+          className={`step-btn focus-ring min-w-0 flex items-center justify-center text-[var(--step-text)] rounded-[var(--radius-btn)] shadow-[var(--btn-shadow)] select-none font-bold transition-all active:scale-95 ${cls}`}
           style={{
             height: btnHeight,
             paddingInline: btnPx,
