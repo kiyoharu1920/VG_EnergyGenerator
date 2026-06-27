@@ -12,8 +12,10 @@ export type StoredSettings = {
 
 const DESIGN_SKINS: readonly DesignSkin[] = [
   "original",
+  "neon",
+  "wafu",
+  "chuka",
   "tcg",
-  "minimal",
   "led",
 ];
 

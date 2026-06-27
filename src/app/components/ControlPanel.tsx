@@ -37,9 +37,11 @@ type ControlPanelProps = {
 
 /** デザイン切替ボタンに表示する各スキンの短縮名。 */
 const SKIN_LABEL: Record<DesignSkin, string> = {
-  original: "元",
+  original: "標準",
+  neon: "ネオン",
+  wafu: "和風",
+  chuka: "中華",
   tcg: "卓上",
-  minimal: "ミニ",
   led: "LED",
 };
 

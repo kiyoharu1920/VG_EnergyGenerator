@@ -12,7 +12,14 @@ import { useViewportSize } from "./use-viewport-size";
 import { animateLayoutChange } from "./view-transition";
 
 /** デザイン切替ボタンで巡回する順序。 */
-const SKIN_ORDER: readonly DesignSkin[] = ["original", "tcg", "minimal", "led"];
+const SKIN_ORDER: readonly DesignSkin[] = [
+  "original",
+  "neon",
+  "wafu",
+  "chuka",
+  "tcg",
+  "led",
+];
 
 /**
  * プレイヤー数と効果欄の状態から、ページ全体の行構成を返す。

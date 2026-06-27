@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: "Cascadia Mono", Consolas, "Liberation Mono", monospace;
+  --font-serif: "Yu Mincho", "YuMincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
 }
 
 body {
@@ -20,34 +21,35 @@ body {
 
 /* ───────────────────────────────────────────────
    デザインスキン
-   色だけでなく形状（角丸・枠・影・セル間隔・質感）も
-   CSS変数で定義する。ルート要素の data-skin / data-theme で
-   切り替わり、配下のコンポーネントは var() 参照で受け取る。
-   既定（original / light）の値は :root に置く。
+   色（明暗）と形状をCSS変数で定義する。ルート要素の
+   data-skin / data-theme で切り替わり、配下のコンポーネントは
+   var() 参照で受け取る。各スキンの基底ブロックが light を、
+   [data-theme="dark"] が dark を供給する。形状は基底のみ。
    ─────────────────────────────────────────────── */
+
+/* === 標準（original）=== */
 :root {
   --app-font: var(--font-sans);
-  /* 色 */
-  --page-bg: #f1f5f9; /* slate-100 */
-  --p1-panel-bg: #eff6ff; /* blue-50 */
-  --p1-accent: rgba(96, 165, 250, 0.5); /* blue-400/50 */
-  --p1-card-border: rgba(59, 130, 246, 0.3); /* blue-500/30 */
-  --p2-panel-bg: #fef2f2; /* red-50 */
-  --p2-accent: rgba(248, 113, 113, 0.5); /* red-400/50 */
-  --p2-card-border: rgba(239, 68, 68, 0.3); /* red-500/30 */
-  --cell-border: #cbd5e1; /* slate-300 */
+  --page-bg: #f1f5f9;
+  --p1-panel-bg: #eff6ff;
+  --p1-accent: rgba(96, 165, 250, 0.5);
+  --p1-card-border: rgba(59, 130, 246, 0.3);
+  --p2-panel-bg: #fef2f2;
+  --p2-accent: rgba(248, 113, 113, 0.5);
+  --p2-card-border: rgba(239, 68, 68, 0.3);
+  --cell-border: #cbd5e1;
   --cell-divider: rgba(203, 213, 225, 0.7);
-  --cell-on-bg: #34d399; /* emerald-400 */
+  --cell-on-bg: #34d399;
   --cell-on-text: #0f172a;
-  --cell-fill-bg: rgba(6, 182, 212, 0.8); /* cyan-500/80 */
+  --cell-fill-bg: rgba(6, 182, 212, 0.8);
   --cell-fill-text: #0f172a;
-  --cell-empty-bg: #e2e8f0; /* slate-200 */
-  --cell-empty-text: #64748b; /* slate-500 */
-  --step-dec3: #6d28d9; /* violet-700 (-7) */
-  --step-dec2: #1d4ed8; /* blue-700 (-3) */
-  --step-dec1: #3b82f6; /* blue-500 (-1) */
-  --step-inc1: #f43f5e; /* rose-500 (+1) */
-  --step-inc2: #be123c; /* rose-700 (+3) */
+  --cell-empty-bg: #e2e8f0;
+  --cell-empty-text: #64748b;
+  --step-dec3: #6d28d9;
+  --step-dec2: #1d4ed8;
+  --step-dec1: #3b82f6;
+  --step-inc1: #f43f5e;
+  --step-inc2: #be123c;
   --step-text: #ffffff;
   --control-bg: #ffffff;
   --control-text: #334155;
@@ -77,61 +79,299 @@ body {
   --cell-fill-glow: 0 0 #0000;
   --letter-spacing: normal;
 }
-
-/* 元デザイン・暗色（形状は :root を継承し、色のみ上書き） */
 [data-skin="original"][data-theme="dark"] {
-  --page-bg: #020617; /* slate-950 */
-  --p1-panel-bg: rgba(23, 37, 84, 0.5); /* blue-950/50 */
-  --p2-panel-bg: rgba(69, 10, 10, 0.5); /* red-950/50 */
-  --cell-border: #475569; /* slate-600 */
+  --page-bg: #020617;
+  --p1-panel-bg: rgba(23, 37, 84, 0.5);
+  --p2-panel-bg: rgba(69, 10, 10, 0.5);
+  --cell-border: #475569;
   --cell-divider: rgba(71, 85, 105, 0.5);
-  --cell-empty-bg: rgba(30, 41, 59, 0.6); /* slate-800/60 */
-  --cell-empty-text: #94a3b8; /* slate-400 */
-  --control-bg: #334155; /* slate-700 */
+  --cell-empty-bg: rgba(30, 41, 59, 0.6);
+  --cell-empty-text: #94a3b8;
+  --control-bg: #334155;
   --control-text: #ffffff;
-  --control-border: #64748b; /* slate-500 */
-  --control-hover-bg: #475569; /* slate-600 */
-  --center-bg: rgba(15, 23, 42, 0.7); /* slate-900/70 */
+  --control-border: #64748b;
+  --control-hover-bg: #475569;
+  --center-bg: rgba(15, 23, 42, 0.7);
   --center-border: #334155;
-  --handle-bg: #64748b; /* slate-500 */
+  --handle-bg: #64748b;
   --card-bg: rgba(15, 23, 42, 0.8);
   --card-text: #cbd5e1;
 }
 
-/* 案A: TCG卓上マテリアル（盤面・金枠・カード質感・重厚な影） */
-[data-skin="tcg"] {
+/* === ネオン（neon）=== */
+[data-skin="neon"] {
   --app-font: var(--font-sans);
-  --page-bg: #0f0b07;
-  --p1-panel-bg: #17120c;
-  --p1-accent: rgba(190, 150, 70, 0.55);
-  --p1-card-border: rgba(120, 162, 210, 0.4);
-  --p2-panel-bg: #17120c;
-  --p2-accent: rgba(190, 150, 70, 0.55);
-  --p2-card-border: rgba(210, 140, 116, 0.4);
-  --cell-border: #6b5526;
+  --page-bg: #f5f4fb;
+  --p1-panel-bg: #ffffff;
+  --p1-accent: #d400ff;
+  --p1-card-border: rgba(212, 0, 255, 0.35);
+  --p2-panel-bg: #ffffff;
+  --p2-accent: #00b4d8;
+  --p2-card-border: rgba(0, 180, 216, 0.35);
+  --cell-border: #d8c0f0;
   --cell-divider: transparent;
-  --cell-on-bg: #f0d24e;
+  --cell-on-bg: #ff2bd6;
+  --cell-on-text: #2a0420;
+  --cell-fill-bg: #9d4edd;
+  --cell-fill-text: #ffffff;
+  --cell-empty-bg: #ececf5;
+  --cell-empty-text: #8a8aa0;
+  --step-dec3: #7b2cbf;
+  --step-dec2: #3a86ff;
+  --step-dec1: #00b4d8;
+  --step-inc1: #f72585;
+  --step-inc2: #ff5470;
+  --step-text: #ffffff;
+  --control-bg: #ffffff;
+  --control-text: #7b2cbf;
+  --control-border: #e0d0f5;
+  --control-hover-bg: #f3e8ff;
+  --center-bg: #ffffff;
+  --center-border: #e9d5ff;
+  --handle-bg: #d400ff;
+  --card-bg: #ffffff;
+  --card-text: #44405a;
+  --radius-panel: 10px;
+  --radius-cellbox: 10px;
+  --radius-cell: 6px;
+  --radius-btn: 8px;
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --radius-handle: 3px;
+  --border-w: 1px;
+  --cells-pad: 3px;
+  --cell-gap: 3px;
+  --cells-track: #e4e0f0;
+  --panel-shadow: 0 0 0 1px rgba(212, 0, 255, 0.25), 0 4px 18px rgba(212, 0, 255, 0.15);
+  --btn-shadow: 0 2px 10px rgba(124, 44, 191, 0.3);
+  --control-shadow: 0 0 0 1px rgba(212, 0, 255, 0.12);
+  --cell-on-glow: 0 0 10px var(--cell-on-bg);
+  --cell-fill-glow: 0 0 6px var(--cell-fill-bg);
+  --letter-spacing: 0.03em;
+}
+[data-skin="neon"][data-theme="dark"] {
+  --page-bg: #0a0612;
+  --p1-panel-bg: #160a28;
+  --p1-accent: #d400ff;
+  --p2-panel-bg: #160a28;
+  --p2-accent: #00e5ff;
+  --cell-border: #3a2060;
+  --cell-on-bg: #ff2bd6;
+  --cell-on-text: #1a0420;
+  --cell-fill-bg: #b026ff;
+  --cell-fill-text: #ffffff;
+  --cell-empty-bg: #1a1030;
+  --cell-empty-text: #7a6a9a;
+  --control-bg: #1a0f2e;
+  --control-text: #e0a0ff;
+  --control-border: #4a2a6a;
+  --control-hover-bg: #261640;
+  --center-bg: #120a20;
+  --center-border: #3a2050;
+  --handle-bg: #d400ff;
+  --card-bg: #120a20;
+  --card-text: #c8b0e8;
+  --cells-track: #060410;
+  --panel-shadow: 0 0 0 1px rgba(212, 0, 255, 0.45), 0 0 22px rgba(212, 0, 255, 0.25);
+}
+
+/* === 和風（wafu）=== */
+[data-skin="wafu"] {
+  --app-font: var(--font-serif);
+  --page-bg: #f0e8d6;
+  --p1-panel-bg: #faf5e8;
+  --p1-accent: #1f3a5f;
+  --p1-card-border: rgba(31, 58, 95, 0.35);
+  --p2-panel-bg: #faf5e8;
+  --p2-accent: #9e2b25;
+  --p2-card-border: rgba(158, 43, 37, 0.35);
+  --cell-border: #c8b896;
+  --cell-divider: transparent;
+  --cell-on-bg: #3a7d5f;
+  --cell-on-text: #f3ede0;
+  --cell-fill-bg: #7da890;
+  --cell-fill-text: #1a2a20;
+  --cell-empty-bg: #e3dcc4;
+  --cell-empty-text: #8a7f63;
+  --step-dec3: #3a3a4a;
+  --step-dec2: #1f3a5f;
+  --step-dec1: #5a7a9a;
+  --step-inc1: #b7282e;
+  --step-inc2: #7a1c1c;
+  --step-text: #f5efe0;
+  --control-bg: #ece3d0;
+  --control-text: #4a3f2a;
+  --control-border: #c8b896;
+  --control-hover-bg: #e0d4ba;
+  --center-bg: #f0e9d8;
+  --center-border: #c8b896;
+  --handle-bg: #a89a78;
+  --card-bg: #f7f1e3;
+  --card-text: #4a3f2a;
+  --radius-panel: 4px;
+  --radius-cellbox: 4px;
+  --radius-cell: 3px;
+  --radius-btn: 4px;
+  --radius-control: 4px;
+  --radius-card: 4px;
+  --radius-handle: 2px;
+  --border-w: 1px;
+  --cells-pad: 3px;
+  --cell-gap: 2px;
+  --cells-track: #d8cfb4;
+  --panel-shadow: 0 2px 8px rgba(60, 40, 20, 0.12);
+  --btn-shadow: 0 1px 3px rgba(60, 40, 20, 0.2);
+  --control-shadow: 0 1px 3px rgba(60, 40, 20, 0.1);
+  --cell-on-glow: 0 0 #0000;
+  --cell-fill-glow: 0 0 #0000;
+  --letter-spacing: 0.05em;
+}
+[data-skin="wafu"][data-theme="dark"] {
+  --page-bg: #15120c;
+  --p1-panel-bg: #201a12;
+  --p1-accent: #4a6f9a;
+  --p2-panel-bg: #201a12;
+  --p2-accent: #c8504a;
+  --cell-border: #4a3f28;
+  --cell-on-bg: #4a9d72;
+  --cell-on-text: #0a140e;
+  --cell-fill-bg: #2f6f50;
+  --cell-fill-text: #d6e8dc;
+  --cell-empty-bg: #261f16;
+  --cell-empty-text: #8a7c5e;
+  --step-dec3: #4a4a5e;
+  --step-dec2: #2b4a6f;
+  --step-dec1: #6a8aaa;
+  --step-inc1: #c8504a;
+  --step-inc2: #9a3030;
+  --step-text: #f0e6d0;
+  --control-bg: #211b12;
+  --control-text: #d8c9a0;
+  --control-border: #4a3f28;
+  --control-hover-bg: #2c2418;
+  --center-bg: #1a160e;
+  --center-border: #4a3f28;
+  --handle-bg: #6a5d3e;
+  --card-bg: #1a150d;
+  --card-text: #d0c4a0;
+  --cells-track: #0e0b06;
+}
+
+/* === 中華風（chuka）=== */
+[data-skin="chuka"] {
+  --app-font: var(--font-serif);
+  --page-bg: #f5e3d8;
+  --p1-panel-bg: #fff5ee;
+  --p1-accent: #c8102e;
+  --p1-card-border: rgba(200, 16, 46, 0.4);
+  --p2-panel-bg: #fff5ee;
+  --p2-accent: #c8920c;
+  --p2-card-border: rgba(200, 146, 12, 0.4);
+  --cell-border: #d4a017;
+  --cell-divider: transparent;
+  --cell-on-bg: #c8102e;
+  --cell-on-text: #ffe8b0;
+  --cell-fill-bg: #e8b04a;
+  --cell-fill-text: #5a2010;
+  --cell-empty-bg: #f0dcc4;
+  --cell-empty-text: #a87f5a;
+  --step-dec3: #7a1020;
+  --step-dec2: #b01028;
+  --step-dec1: #d4506a;
+  --step-inc1: #c0900f;
+  --step-inc2: #a8740c;
+  --step-text: #fff5e0;
+  --control-bg: #fff5ee;
+  --control-text: #8a1020;
+  --control-border: #d4a017;
+  --control-hover-bg: #f7e0d0;
+  --center-bg: #fff0e6;
+  --center-border: #d4a017;
+  --handle-bg: #c8102e;
+  --card-bg: #fff7f0;
+  --card-text: #6a2418;
+  --radius-panel: 6px;
+  --radius-cellbox: 6px;
+  --radius-cell: 4px;
+  --radius-btn: 6px;
+  --radius-control: 6px;
+  --radius-card: 6px;
+  --radius-handle: 2px;
+  --border-w: 2px;
+  --cells-pad: 3px;
+  --cell-gap: 3px;
+  --cells-track: #e0c4b0;
+  --panel-shadow: 0 4px 14px rgba(120, 16, 30, 0.2);
+  --btn-shadow: 0 3px 8px rgba(120, 16, 30, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  --control-shadow: 0 2px 6px rgba(120, 16, 30, 0.15);
+  --cell-on-glow: inset 0 0 0 1px rgba(255, 215, 0, 0.4);
+  --cell-fill-glow: inset 0 0 0 1px rgba(200, 16, 46, 0.3);
+  --letter-spacing: 0.04em;
+}
+[data-skin="chuka"][data-theme="dark"] {
+  --page-bg: #1c0808;
+  --p1-panel-bg: #2a0c0c;
+  --p1-accent: #ffd700;
+  --p2-panel-bg: #2a0c0c;
+  --p2-accent: #ffce5a;
+  --cell-border: #8a5a10;
+  --cell-on-bg: #e02038;
+  --cell-on-text: #ffe8b0;
+  --cell-fill-bg: #ffce5a;
+  --cell-fill-text: #5a1810;
+  --cell-empty-bg: #2a1410;
+  --cell-empty-text: #b08060;
+  --step-dec3: #8a1020;
+  --step-dec2: #c01828;
+  --step-dec1: #e0506a;
+  --step-inc1: #ffce5a;
+  --step-inc2: #c8920c;
+  --step-text: #fff0d0;
+  --control-bg: #2a1010;
+  --control-text: #ffd700;
+  --control-border: #8a5a10;
+  --control-hover-bg: #3a1818;
+  --center-bg: #240c0c;
+  --center-border: #8a5a10;
+  --handle-bg: #ffd700;
+  --card-bg: #240c0c;
+  --card-text: #f0c890;
+  --cells-track: #160606;
+}
+
+/* === TCG卓上（tcg）=== */
+[data-skin="tcg"] {
+  --app-font: var(--font-serif);
+  --page-bg: #d8cab0;
+  --p1-panel-bg: #ece0c4;
+  --p1-accent: rgba(138, 109, 59, 0.6);
+  --p1-card-border: rgba(138, 109, 59, 0.45);
+  --p2-panel-bg: #ece0c4;
+  --p2-accent: rgba(138, 109, 59, 0.6);
+  --p2-card-border: rgba(138, 109, 59, 0.45);
+  --cell-border: #a8895a;
+  --cell-divider: transparent;
+  --cell-on-bg: #c8941e;
   --cell-on-text: #3a2c08;
-  --cell-fill-bg: #caa42b;
-  --cell-fill-text: #3a2c08;
-  --cell-empty-bg: #2a2114;
-  --cell-empty-text: #7a6a48;
+  --cell-fill-bg: #d8b454;
+  --cell-fill-text: #4a3608;
+  --cell-empty-bg: #c4b48c;
+  --cell-empty-text: #6a5a38;
   --step-dec3: #4c3a73;
   --step-dec2: #2c4a7c;
   --step-dec1: #3a6099;
   --step-inc1: #9a4a3a;
   --step-inc2: #732419;
   --step-text: #f5ead0;
-  --control-bg: #241c12;
-  --control-text: #d8c9a0;
-  --control-border: #5a4528;
-  --control-hover-bg: #30261a;
-  --center-bg: #1c1610;
-  --center-border: #5a4528;
+  --control-bg: #e0d2b0;
+  --control-text: #4a3a1c;
+  --control-border: #a8895a;
+  --control-hover-bg: #d4c39c;
+  --center-bg: #e6d8b8;
+  --center-border: #a8895a;
   --handle-bg: #8a6d3b;
-  --card-bg: #1a140c;
-  --card-text: #cdbb98;
-  /* 形状: 角丸控えめ・太い金枠・深い影・セル間隔 */
+  --card-bg: #ece0c4;
+  --card-text: #4a3a1c;
   --radius-panel: 0.5rem;
   --radius-cellbox: 0.5rem;
   --radius-cell: 4px;
@@ -142,80 +382,99 @@ body {
   --border-w: 2px;
   --cells-pad: 4px;
   --cell-gap: 3px;
+  --cells-track: #b8a578;
+  --panel-shadow: 0 6px 16px rgba(60, 40, 15, 0.3), inset 0 1px 0 rgba(255, 250, 230, 0.4);
+  --btn-shadow: 0 4px 10px rgba(60, 40, 15, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  --control-shadow: 0 3px 8px rgba(60, 40, 15, 0.25);
+  --cell-on-glow: inset 0 1px 0 rgba(255, 250, 210, 0.6);
+  --cell-fill-glow: inset 0 1px 0 rgba(255, 244, 180, 0.4);
+  --letter-spacing: 0.02em;
+}
+[data-skin="tcg"][data-theme="dark"] {
+  --page-bg: #0f0b07;
+  --p1-panel-bg: #17120c;
+  --p1-accent: rgba(190, 150, 70, 0.55);
+  --p2-panel-bg: #17120c;
+  --p2-accent: rgba(190, 150, 70, 0.55);
+  --cell-border: #6b5526;
+  --cell-on-bg: #f0d24e;
+  --cell-on-text: #3a2c08;
+  --cell-fill-bg: #caa42b;
+  --cell-fill-text: #3a2c08;
+  --cell-empty-bg: #2a2114;
+  --cell-empty-text: #7a6a48;
+  --control-bg: #241c12;
+  --control-text: #d8c9a0;
+  --control-border: #5a4528;
+  --control-hover-bg: #30261a;
+  --center-bg: #1c1610;
+  --center-border: #5a4528;
+  --handle-bg: #8a6d3b;
+  --card-bg: #1a140c;
+  --card-text: #cdbb98;
   --cells-track: #0b0805;
   --panel-shadow: 0 10px 24px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(240, 210, 120, 0.12);
   --btn-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-  --control-shadow: 0 3px 8px rgba(0, 0, 0, 0.45);
-  --cell-on-glow: inset 0 1px 0 rgba(255, 248, 200, 0.5);
-  --cell-fill-glow: inset 0 1px 0 rgba(255, 244, 180, 0.35);
-  --letter-spacing: 0.02em;
 }
 
-/* 案B: ミニマル機能特化（余白・極薄枠・影なし・フラット） */
-[data-skin="minimal"] {
-  --app-font: var(--font-sans);
-  --page-bg: #fbfbfa;
-  --p1-panel-bg: #ffffff;
-  --p1-accent: #ededea;
-  --p1-card-border: #ededea;
-  --p2-panel-bg: #ffffff;
-  --p2-accent: #ededea;
-  --p2-card-border: #ededea;
-  --cell-border: #e4e4e1;
-  --cell-divider: transparent;
-  --cell-on-bg: #16a34a;
-  --cell-on-text: #ffffff;
-  --cell-fill-bg: #4ade80;
-  --cell-fill-text: #064e2b;
-  --cell-empty-bg: #f1f1ef;
-  --cell-empty-text: #9b9b96;
-  --step-dec3: #1e293b;
-  --step-dec2: #475569;
-  --step-dec1: #94a3b8;
-  --step-inc1: #475569;
-  --step-inc2: #1e293b;
-  --step-text: #ffffff;
-  --control-bg: #ffffff;
-  --control-text: #44443f;
-  --control-border: #dcdcd8;
-  --control-hover-bg: #f1f1ef;
-  --center-bg: #ffffff;
-  --center-border: #ededea;
-  --handle-bg: #d4d4d0;
-  --card-bg: #ffffff;
-  --card-text: #44443f;
-  /* 形状: ほぼ角・極薄枠・影ゼロ・広めのセル間隔 */
-  --radius-panel: 4px;
-  --radius-cellbox: 4px;
-  --radius-cell: 3px;
-  --radius-btn: 6px;
-  --radius-control: 6px;
-  --radius-card: 4px;
-  --radius-handle: 2px;
-  --border-w: 1px;
-  --cells-pad: 0px;
-  --cell-gap: 4px;
-  --cells-track: transparent;
-  --panel-shadow: none;
-  --btn-shadow: none;
-  --control-shadow: none;
-  --cell-on-glow: 0 0 #0000;
-  --cell-fill-glow: 0 0 #0000;
-  --letter-spacing: 0.01em;
-}
-
-/* 案C: レトロLED計器（黒地・角ばり・メカ枠・セグメント・発光） */
+/* === レトロLED（led）=== */
 [data-skin="led"] {
   --app-font: var(--font-mono);
+  --page-bg: #b8bcc0;
+  --p1-panel-bg: #c8ccd0;
+  --p1-accent: rgba(106, 112, 120, 0.9);
+  --p1-card-border: rgba(106, 112, 120, 0.5);
+  --p2-panel-bg: #c8ccd0;
+  --p2-accent: rgba(138, 106, 106, 0.9);
+  --p2-card-border: rgba(138, 106, 106, 0.5);
+  --cell-border: #888c90;
+  --cell-divider: transparent;
+  --cell-on-bg: #1a7a3a;
+  --cell-on-text: #d8f0dc;
+  --cell-fill-bg: #4a9a5a;
+  --cell-fill-text: #082810;
+  --cell-empty-bg: #a8acb0;
+  --cell-empty-text: #5a6058;
+  --step-dec3: #4a3a8a;
+  --step-dec2: #2a5a9a;
+  --step-dec1: #3a7ab0;
+  --step-inc1: #b04a4a;
+  --step-inc2: #9a2a2a;
+  --step-text: #ffffff;
+  --control-bg: #a8acb0;
+  --control-text: #2a3038;
+  --control-border: #888c90;
+  --control-hover-bg: #b8bcc0;
+  --center-bg: #b0b4b8;
+  --center-border: #888c90;
+  --handle-bg: #6a7078;
+  --card-bg: #c0c4c8;
+  --card-text: #2a3038;
+  --radius-panel: 3px;
+  --radius-cellbox: 4px;
+  --radius-cell: 2px;
+  --radius-btn: 3px;
+  --radius-control: 3px;
+  --radius-card: 3px;
+  --radius-handle: 1px;
+  --border-w: 2px;
+  --cells-pad: 5px;
+  --cell-gap: 4px;
+  --cells-track: #989ca0;
+  --panel-shadow: inset 0 0 8px rgba(0, 0, 0, 0.2), 0 0 0 1px #888c90;
+  --btn-shadow: inset 0 0 0 1px rgba(40, 48, 56, 0.2);
+  --control-shadow: inset 0 0 0 1px rgba(40, 48, 56, 0.15);
+  --cell-on-glow: 0 0 #0000;
+  --cell-fill-glow: 0 0 #0000;
+  --letter-spacing: 0.08em;
+}
+[data-skin="led"][data-theme="dark"] {
   --page-bg: #08090b;
   --p1-panel-bg: #0c0d0f;
   --p1-accent: rgba(43, 74, 107, 0.9);
-  --p1-card-border: rgba(43, 74, 107, 0.7);
   --p2-panel-bg: #0c0d0f;
   --p2-accent: rgba(107, 43, 43, 0.9);
-  --p2-card-border: rgba(107, 43, 43, 0.7);
   --cell-border: #2b2f36;
-  --cell-divider: transparent;
   --cell-on-bg: #39e07a;
   --cell-on-text: #04140a;
   --cell-fill-bg: #1f9a52;
@@ -237,24 +496,12 @@ body {
   --handle-bg: #2b4a6b;
   --card-bg: #0c0d0f;
   --card-text: #8fb9cf;
-  /* 形状: 角ばり・太いメカ枠・黒い溝・発光セグメント */
-  --radius-panel: 3px;
-  --radius-cellbox: 4px;
-  --radius-cell: 2px;
-  --radius-btn: 3px;
-  --radius-control: 3px;
-  --radius-card: 3px;
-  --radius-handle: 1px;
-  --border-w: 2px;
-  --cells-pad: 5px;
-  --cell-gap: 4px;
   --cells-track: #050606;
   --panel-shadow: inset 0 0 12px rgba(0, 0, 0, 0.8), 0 0 0 1px #000;
   --btn-shadow: inset 0 0 0 1px rgba(120, 160, 200, 0.15);
   --control-shadow: inset 0 0 0 1px rgba(120, 160, 200, 0.1);
-  --cell-on-glow: 0 0 8px 0 var(--cell-on-bg);
-  --cell-fill-glow: 0 0 5px 0 var(--cell-fill-bg);
-  --letter-spacing: 0.08em;
+  --cell-on-glow: 0 0 8px var(--cell-on-bg);
+  --cell-fill-glow: 0 0 5px var(--cell-fill-bg);
 }
 
 /* スキンのフォントと字間を配下へ適用 */
