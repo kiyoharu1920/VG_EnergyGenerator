@@ -133,7 +133,6 @@ function RandomToolButton(props: RandomToolButtonProps): ReactElement {
     onClick,
     controlBg,
   } = props;
-  const toolKey = testid === "dice-roll" ? "dice" : "coin";
 
   return (
     <ControlSlot className={wrapperClass}>
@@ -145,7 +144,7 @@ function RandomToolButton(props: RandomToolButtonProps): ReactElement {
         title={title}
       >
         <span
-          key={`${toolKey}-${rollId}-${result ?? "idle"}`}
+          key={`${testid}-${rollId}-${result ?? "idle"}`}
           data-animation-id={rollId}
           className="control-value-pop"
           aria-live="polite"
