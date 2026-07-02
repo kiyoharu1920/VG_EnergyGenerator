@@ -44,6 +44,23 @@ function calcCellMetrics(cellSize: number): CellMetrics {
   };
 }
 
+/** 片側ページ余白として確保する短辺比率。p-[2vmin]よりgap分など大きめに見積もる。 */
+const PAGE_PADDING_RATIO = 0.04;
+/** ページ余白の最小値(px)。 */
+const PAGE_PADDING_MIN = 8;
+/** 効果欄表示中の中央領域の予約高さ(px)。2人用は操作バーがカード説明の間に収まるため小さい。 */
+const CENTER_RESERVE_WITH_TEXT_DOUBLE = 86;
+/** 効果欄表示中の中央領域の予約高さ(px)。1人用は操作バーと効果欄が縦に並ぶ。 */
+const CENTER_RESERVE_WITH_TEXT_SINGLE = 126;
+/** 効果欄非表示時の中央操作バーの予約高さ(px)。 */
+const CENTER_RESERVE_COLLAPSED = 54;
+/** ゲージ間gapなど行間に確保する高さ(px)。 */
+const ROW_GAP_RESERVE = 18;
+/** ゲージ内のセル列以外（リサイズつまみ・padding・gap）が占める高さ(px)。 */
+const GAUGE_CHROME_HEIGHT = 58;
+/** セル高さ1pxあたりゲージ全体が伸びる倍率。セル本体(1.0)＋増減ボタン行(0.8)。 */
+const CELL_HEIGHT_FACTOR = 1.8;
+
 /**
  * 画面サイズと表示モードから、セル高さの上限を計算する。
  *
@@ -61,15 +78,17 @@ export function getResponsiveCellMax(
 ): number {
   const gaugeCount = playerMode === "double" ? 2 : 1;
   const shortestSide = Math.min(width, height);
-  const pagePadding = Math.max(8, shortestSide * 0.04);
+  const pagePadding = Math.max(PAGE_PADDING_MIN, shortestSide * PAGE_PADDING_RATIO);
   const centerReserve = showCardText
     ? playerMode === "double"
-      ? 86
-      : 126
-    : 54;
+      ? CENTER_RESERVE_WITH_TEXT_DOUBLE
+      : CENTER_RESERVE_WITH_TEXT_SINGLE
+    : CENTER_RESERVE_COLLAPSED;
   const availablePerGauge =
-    (height - pagePadding * 2 - centerReserve - 18) / gaugeCount;
-  const maxFromHeight = Math.floor((availablePerGauge - 58) / 1.8);
+    (height - pagePadding * 2 - centerReserve - ROW_GAP_RESERVE) / gaugeCount;
+  const maxFromHeight = Math.floor(
+    (availablePerGauge - GAUGE_CHROME_HEIGHT) / CELL_HEIGHT_FACTOR,
+  );
   return Math.max(CELL_MIN, Math.min(CELL_MAX, maxFromHeight));
 }
 
