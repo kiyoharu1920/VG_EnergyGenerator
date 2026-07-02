@@ -34,6 +34,14 @@ type ControlPanelProps = {
 const CONTROL_BUTTON_BASE =
   "control-pressable focus-ring h-8 font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0";
 
+/** 正方形系アクションボタン共通クラス。幅と文字サイズは呼び出し側で指定する。 */
+const ACTION_BUTTON_CLASS =
+  "shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] active:scale-[0.92]";
+
+/** 両端のトグルボタン共通クラス。 */
+const TOGGLE_BUTTON_CLASS =
+  "min-w-0 flex-1 rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] active:scale-[0.97]";
+
 type RandomToolButtonProps = {
   /** ボタンのテストID。 */
   testid: "dice-roll" | "coin-toss";
@@ -132,7 +140,7 @@ function RandomToolButton(props: RandomToolButtonProps): ReactElement {
       <ControlButton
         testid={testid}
         onClick={onClick}
-        className={`w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] ${fontSizeClass} active:scale-[0.92] ${rollId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
+        className={`w-full ${ACTION_BUTTON_CLASS} ${fontSizeClass} ${rollId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
         ariaLabel={ariaLabel}
         title={title}
       >
@@ -176,10 +184,7 @@ export function ControlPanel({
   const wideActionWrapperClass = isHorizontal
     ? "w-[clamp(2.5rem,14vw,4rem)]"
     : "w-[clamp(2.5rem,14vw,4rem)] landscape:w-full";
-  const diceCoinWrapperClass = wideActionWrapperClass;
-  const resetWrapperClass = wideActionWrapperClass;
   const themeWrapperClass = isHorizontal ? "w-10" : "w-10 landscape:w-full";
-  const skinWrapperClass = wideActionWrapperClass;
 
   return (
     <div
@@ -189,18 +194,18 @@ export function ControlPanel({
       <ControlButton
         testid="player-mode-toggle"
         onClick={onTogglePlayerMode}
-        className={`min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] active:scale-[0.97] ${controlBg}`}
+        className={`${TOGGLE_BUTTON_CLASS} ${controlButtonClass} ${controlBg}`}
         ariaLabel={isDouble ? "1人用へ切り替える" : "2人用へ切り替える"}
       >
         <span key={isDouble ? "double" : "single"} className="control-value-pop whitespace-nowrap">
           {isDouble ? "1人" : "2人"}
         </span>
       </ControlButton>
-      <ControlSlot className={resetWrapperClass}>
+      <ControlSlot className={wideActionWrapperClass}>
         <ControlButton
           testid="reset-game"
           onClick={onResetGame}
-          className={`w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-base active:scale-[0.92] ${controlBg}`}
+          className={`w-full ${ACTION_BUTTON_CLASS} text-base ${controlBg}`}
           ariaLabel="エネルギーとランダム結果をリセットする"
           title="リセット"
         >
@@ -217,7 +222,7 @@ export function ControlPanel({
         title="サイコロ"
         ariaLabel="サイコロを振る"
         fontSizeClass="text-sm"
-        wrapperClass={diceCoinWrapperClass}
+        wrapperClass={wideActionWrapperClass}
         onClick={dice.trigger}
         controlBg={controlBg}
       />
@@ -225,7 +230,7 @@ export function ControlPanel({
         <ControlButton
           testid="theme-toggle"
           onClick={onToggleDark}
-          className={`w-8 shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-base active:scale-[0.92] ${controlBg}`}
+          className={`w-8 ${ACTION_BUTTON_CLASS} text-base ${controlBg}`}
           ariaLabel={isDark ? "明色テーマへ切り替える" : "暗色テーマへ切り替える"}
         >
           <span key={isDark ? "light" : "dark"} className="control-value-pop">
@@ -241,15 +246,15 @@ export function ControlPanel({
         title="コイントス"
         ariaLabel="コイントスをする"
         fontSizeClass="text-[12px]"
-        wrapperClass={diceCoinWrapperClass}
+        wrapperClass={wideActionWrapperClass}
         onClick={coin.trigger}
         controlBg={controlBg}
       />
-      <ControlSlot className={skinWrapperClass}>
+      <ControlSlot className={wideActionWrapperClass}>
         <ControlButton
           testid="skin-toggle"
           onClick={onCycleSkin}
-          className={`w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-[12px] active:scale-[0.92] ${controlBg}`}
+          className={`w-full ${ACTION_BUTTON_CLASS} text-[12px] ${controlBg}`}
           ariaLabel={`デザインを切り替える（現在 ${SKIN_LABEL[skin]}）`}
           title="デザイン切替"
         >
@@ -261,7 +266,7 @@ export function ControlPanel({
       <ControlButton
         testid="card-text-toggle"
         onClick={onToggleCardText}
-        className={`min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] active:scale-[0.97] ${controlBg}`}
+        className={`${TOGGLE_BUTTON_CLASS} ${controlButtonClass} ${controlBg}`}
         ariaExpanded={showCardText}
         ariaLabel={showCardText ? "効果欄を閉じる" : "効果欄を開く"}
         title={showCardText ? "効果欄を閉じる" : "効果欄を開く"}
