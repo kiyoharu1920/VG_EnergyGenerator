@@ -7,20 +7,11 @@ import { EnergyGauge, CELL_DEFAULT, getResponsiveCellMax } from "./components/En
 import { EnergyTextCard } from "./components/EnergyTextCard";
 import { useStoredSettings, writeStoredSettings } from "./settings-storage";
 import type { StoredSettings } from "./settings-storage";
+import { getNextSkin } from "./skins";
 import { getPageTheme } from "./theme";
-import type { CoinResult, ControlPanelLayout, DesignSkin, PlayerMode } from "./types";
+import type { CoinResult, ControlPanelLayout, PlayerMode } from "./types";
 import { useViewportSize } from "./use-viewport-size";
 import { animateLayoutChange } from "./view-transition";
-
-/** デザイン切替ボタンで巡回する順序。 */
-const SKIN_ORDER: readonly DesignSkin[] = [
-  "original",
-  "neon",
-  "wafu",
-  "chuka",
-  "tcg",
-  "led",
-];
 
 /**
  * プレイヤー数と効果欄の状態から、ページ全体の行構成を返す。
@@ -105,8 +96,7 @@ export default function Home(): ReactElement {
     animateSettingsUpdate({ isTwoPlayer: !storedSettings.isTwoPlayer });
   /** デザインスキンを次の候補へ巡回させる。 */
   const cycleSkin = (): void => {
-    const nextIndex = (SKIN_ORDER.indexOf(skin) + 1) % SKIN_ORDER.length;
-    updateSettings({ skin: SKIN_ORDER[nextIndex] });
+    updateSettings({ skin: getNextSkin(skin) });
   };
 
   /**

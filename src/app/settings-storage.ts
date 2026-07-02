@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { normalizeSkin } from "./skins";
 import type { DesignSkin } from "./types";
 
 export type StoredSettings = {
@@ -9,22 +10,6 @@ export type StoredSettings = {
   showDescription: boolean;
   skin: DesignSkin;
 };
-
-const DESIGN_SKINS: readonly DesignSkin[] = [
-  "original",
-  "neon",
-  "wafu",
-  "chuka",
-  "tcg",
-  "led",
-];
-
-/** 不明値は元デザインへ寄せて、旧保存データとも後方互換にする。 */
-function normalizeSkin(value: unknown): DesignSkin {
-  return DESIGN_SKINS.includes(value as DesignSkin)
-    ? (value as DesignSkin)
-    : "original";
-}
 
 /** UI設定をlocalStorageへ保存するキー。 */
 const SETTINGS_STORAGE_KEY = "vg-energy-generator:settings:v1";

@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
+import { SKIN_LABEL } from "../skins";
 import { getPageTheme } from "../theme";
 import type { CoinResult, ControlPanelLayout, DesignSkin } from "../types";
 
@@ -39,16 +40,6 @@ type ControlPanelProps = {
 
 const CONTROL_BUTTON_BASE =
   "control-pressable focus-ring h-8 font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0";
-
-/** デザイン切替ボタンに表示する各スキンの短縮名。 */
-const SKIN_LABEL: Record<DesignSkin, string> = {
-  original: "標準",
-  neon: "ネオン",
-  wafu: "和風",
-  chuka: "中華",
-  tcg: "卓上",
-  led: "LED",
-};
 
 type RandomToolButtonProps = {
   /** ボタンのテストID。 */
