@@ -6,6 +6,7 @@ import { ControlPanel } from "./components/ControlPanel";
 import { EnergyGauge, CELL_DEFAULT, getResponsiveCellMax } from "./components/EnergyGauge";
 import { EnergyTextCard } from "./components/EnergyTextCard";
 import { useStoredSettings, writeStoredSettings } from "./settings-storage";
+import type { StoredSettings } from "./settings-storage";
 import { getPageTheme } from "./theme";
 import type { CoinResult, ControlPanelLayout, DesignSkin, PlayerMode } from "./types";
 import { useViewportSize } from "./use-viewport-size";
@@ -69,6 +70,14 @@ export default function Home(): ReactElement {
   const isDouble = playerMode === "double";
   const gridRows = getGridRows(playerMode, showCardText);
 
+  /** 保存済みUI設定を一部だけ更新する。 */
+  const updateSettings = (settings: Partial<StoredSettings>): void => {
+    writeStoredSettings({ ...storedSettings, ...settings });
+  };
+  /** 大きく配置が変わる設定だけView Transitionを挟む。 */
+  const animateSettingsUpdate = (settings: Partial<StoredSettings>): void =>
+    animateLayoutChange(() => updateSettings(settings));
+
   /** 6面サイコロを振り、同じ結果でも表示アニメーションを再実行する。 */
   const rollDice = (): void => {
     setDiceResult(Math.floor(Math.random() * 6) + 1);
@@ -90,24 +99,14 @@ export default function Home(): ReactElement {
   };
   /** 効果欄の開閉に伴う大きなレイアウト変更だけ滑らかに切り替える。 */
   const toggleCardText = (): void =>
-    animateLayoutChange(() =>
-      writeStoredSettings({
-        ...storedSettings,
-        showDescription: !storedSettings.showDescription,
-      })
-    );
+    animateSettingsUpdate({ showDescription: !storedSettings.showDescription });
   /** プレイヤー数の切替に伴うゲージと説明欄の増減を滑らかに切り替える。 */
   const togglePlayerMode = (): void =>
-    animateLayoutChange(() =>
-      writeStoredSettings({
-        ...storedSettings,
-        isTwoPlayer: !storedSettings.isTwoPlayer,
-      })
-    );
+    animateSettingsUpdate({ isTwoPlayer: !storedSettings.isTwoPlayer });
   /** デザインスキンを次の候補へ巡回させる。 */
   const cycleSkin = (): void => {
     const nextIndex = (SKIN_ORDER.indexOf(skin) + 1) % SKIN_ORDER.length;
-    writeStoredSettings({ ...storedSettings, skin: SKIN_ORDER[nextIndex] });
+    updateSettings({ skin: SKIN_ORDER[nextIndex] });
   };
 
   /**
@@ -128,12 +127,7 @@ export default function Home(): ReactElement {
       coinTossId={coinTossId}
       onTogglePlayerMode={togglePlayerMode}
       onResetGame={resetGame}
-      onToggleDark={() =>
-        writeStoredSettings({
-          ...storedSettings,
-          theme: isDark ? "light" : "dark",
-        })
-      }
+      onToggleDark={() => updateSettings({ theme: isDark ? "light" : "dark" })}
       onToggleCardText={toggleCardText}
       onCycleSkin={cycleSkin}
       onRollDice={rollDice}

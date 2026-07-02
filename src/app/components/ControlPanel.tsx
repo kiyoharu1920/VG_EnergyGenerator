@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { getPageTheme } from "../theme";
 import type { CoinResult, ControlPanelLayout, DesignSkin } from "../types";
 
@@ -37,6 +37,9 @@ type ControlPanelProps = {
   onTossCoin: () => void;
 };
 
+const CONTROL_BUTTON_BASE =
+  "control-pressable focus-ring h-8 font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0";
+
 /** デザイン切替ボタンに表示する各スキンの短縮名。 */
 const SKIN_LABEL: Record<DesignSkin, string> = {
   original: "標準",
@@ -70,6 +73,55 @@ type RandomToolButtonProps = {
   controlBg: string;
 };
 
+type ControlButtonProps = {
+  testid: string;
+  onClick: () => void;
+  className: string;
+  ariaLabel: string;
+  title?: string;
+  ariaExpanded?: boolean;
+  children: ReactNode;
+};
+
+type ControlSlotProps = {
+  className: string;
+  children: ReactNode;
+};
+
+/** 中央操作バー内のボタン共通設定。 */
+function ControlButton({
+  testid,
+  onClick,
+  className,
+  ariaLabel,
+  title,
+  ariaExpanded,
+  children,
+}: ControlButtonProps): ReactElement {
+  return (
+    <button
+      type="button"
+      data-testid={testid}
+      onClick={onClick}
+      className={`${CONTROL_BUTTON_BASE} ${className}`}
+      aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
+      title={title}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** 固定幅ボタンを中央揃えで配置する枠。 */
+function ControlSlot({ className, children }: ControlSlotProps): ReactElement {
+  return (
+    <div className={`${className} shrink-0 flex items-center justify-center`}>
+      {children}
+    </div>
+  );
+}
+
 /**
  * サイコロやコイントスの結果表示つき実行ボタン。
  *
@@ -92,14 +144,12 @@ function RandomToolButton(props: RandomToolButtonProps): ReactElement {
   const toolKey = testid === "dice-roll" ? "dice" : "coin";
 
   return (
-    <div
-      className={`${wrapperClass} shrink-0 flex items-center justify-center`}
-    >
-      <button
-        data-testid={testid}
+    <ControlSlot className={wrapperClass}>
+      <ControlButton
+        testid={testid}
         onClick={onClick}
-        className={`control-pressable focus-ring h-8 w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] ${fontSizeClass} font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${rollId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
-        aria-label={ariaLabel}
+        className={`w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] ${fontSizeClass} active:scale-[0.92] ${rollId > 0 ? "control-result-confirm" : ""} ${controlBg}`}
+        ariaLabel={ariaLabel}
         title={title}
       >
         <span
@@ -110,8 +160,8 @@ function RandomToolButton(props: RandomToolButtonProps): ReactElement {
         >
           {result ?? idleIcon}
         </span>
-      </button>
-    </div>
+      </ControlButton>
+    </ControlSlot>
   );
 }
 
@@ -156,29 +206,29 @@ export function ControlPanel({
       data-testid="center-controls"
       className={`shrink-0 w-full rounded-[var(--radius-control)] [border-width:var(--border-w)] shadow-[var(--control-shadow)] p-1.5 flex ${panelDirectionClass} items-center justify-center gap-1.5 transition-colors ${centerBg}`}
     >
-      <button
-        data-testid="player-mode-toggle"
+      <ControlButton
+        testid="player-mode-toggle"
         onClick={onTogglePlayerMode}
-        className={`control-pressable focus-ring h-8 min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.97] ${controlBg}`}
-        aria-label={isDouble ? "1人用へ切り替える" : "2人用へ切り替える"}
+        className={`min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] active:scale-[0.97] ${controlBg}`}
+        ariaLabel={isDouble ? "1人用へ切り替える" : "2人用へ切り替える"}
       >
         <span key={isDouble ? "double" : "single"} className="control-value-pop whitespace-nowrap">
           {isDouble ? "1人" : "2人"}
         </span>
-      </button>
-      <div className={`${resetWrapperClass} shrink-0 flex items-center justify-center`}>
-        <button
-          data-testid="reset-game"
+      </ControlButton>
+      <ControlSlot className={resetWrapperClass}>
+        <ControlButton
+          testid="reset-game"
           onClick={onResetGame}
-          className={`control-pressable focus-ring h-8 w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-base font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${controlBg}`}
-          aria-label="エネルギーとランダム結果をリセットする"
+          className={`w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-base active:scale-[0.92] ${controlBg}`}
+          ariaLabel="エネルギーとランダム結果をリセットする"
           title="リセット"
         >
           <span className="control-value-pop" aria-hidden="true">
             ↺
           </span>
-        </button>
-      </div>
+        </ControlButton>
+      </ControlSlot>
       <RandomToolButton
         testid="dice-roll"
         rollId={diceRollId}
@@ -191,18 +241,18 @@ export function ControlPanel({
         onClick={onRollDice}
         controlBg={controlBg}
       />
-      <div className={`${themeWrapperClass} shrink-0 flex items-center justify-center`}>
-        <button
-          data-testid="theme-toggle"
+      <ControlSlot className={themeWrapperClass}>
+        <ControlButton
+          testid="theme-toggle"
           onClick={onToggleDark}
-          className={`control-pressable focus-ring h-8 w-8 shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-base font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${controlBg}`}
-          aria-label={isDark ? "明色テーマへ切り替える" : "暗色テーマへ切り替える"}
+          className={`w-8 shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-base active:scale-[0.92] ${controlBg}`}
+          ariaLabel={isDark ? "明色テーマへ切り替える" : "暗色テーマへ切り替える"}
         >
           <span key={isDark ? "light" : "dark"} className="control-value-pop">
             {isDark ? "☀" : "🌙"}
           </span>
-        </button>
-      </div>
+        </ControlButton>
+      </ControlSlot>
       <RandomToolButton
         testid="coin-toss"
         rollId={coinTossId}
@@ -215,31 +265,31 @@ export function ControlPanel({
         onClick={onTossCoin}
         controlBg={controlBg}
       />
-      <div className={`${skinWrapperClass} shrink-0 flex items-center justify-center`}>
-        <button
-          data-testid="skin-toggle"
+      <ControlSlot className={skinWrapperClass}>
+        <ControlButton
+          testid="skin-toggle"
           onClick={onCycleSkin}
-          className={`control-pressable focus-ring h-8 w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.92] ${controlBg}`}
-          aria-label={`デザインを切り替える（現在 ${SKIN_LABEL[skin]}）`}
+          className={`w-full shrink-0 rounded-[var(--radius-btn)] [border-width:var(--border-w)] text-[12px] active:scale-[0.92] ${controlBg}`}
+          ariaLabel={`デザインを切り替える（現在 ${SKIN_LABEL[skin]}）`}
           title="デザイン切替"
         >
           <span key={skin} className="control-value-pop">
             {SKIN_LABEL[skin]}
           </span>
-        </button>
-      </div>
-      <button
-        data-testid="card-text-toggle"
+        </ControlButton>
+      </ControlSlot>
+      <ControlButton
+        testid="card-text-toggle"
         onClick={onToggleCardText}
-        className={`control-pressable focus-ring h-8 min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] font-bold transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-lg active:translate-y-0 active:scale-[0.97] ${controlBg}`}
-        aria-expanded={showCardText}
-        aria-label={showCardText ? "効果欄を閉じる" : "効果欄を開く"}
+        className={`min-w-0 flex-1 ${controlButtonClass} rounded-[var(--radius-control)] [border-width:var(--border-w)] px-1 text-[12px] active:scale-[0.97] ${controlBg}`}
+        ariaExpanded={showCardText}
+        ariaLabel={showCardText ? "効果欄を閉じる" : "効果欄を開く"}
         title={showCardText ? "効果欄を閉じる" : "効果欄を開く"}
       >
         <span key={showCardText ? "open" : "closed"} className="control-value-pop whitespace-nowrap">
           {showCardText ? "閉" : "開"}
         </span>
-      </button>
+      </ControlButton>
     </div>
   );
 }
