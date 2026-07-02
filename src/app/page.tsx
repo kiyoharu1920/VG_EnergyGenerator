@@ -10,6 +10,7 @@ import type { StoredSettings } from "./settings-storage";
 import { getNextSkin } from "./skins";
 import { getPageTheme } from "./theme";
 import type { CoinResult, ControlPanelLayout, PlayerMode } from "./types";
+import { useRandomTool } from "./use-random-tool";
 import { useViewportSize } from "./use-viewport-size";
 import { animateLayoutChange } from "./view-transition";
 
@@ -41,10 +42,10 @@ export default function Home(): ReactElement {
   const [p1Energy, setP1Energy] = useState<number>(0);
   const [p2Energy, setP2Energy] = useState<number>(0);
   const [cellSize, setCellSize] = useState<number>(CELL_DEFAULT);
-  const [diceResult, setDiceResult] = useState<number | null>(null);
-  const [coinResult, setCoinResult] = useState<CoinResult | null>(null);
-  const [diceRollId, setDiceRollId] = useState<number>(0);
-  const [coinTossId, setCoinTossId] = useState<number>(0);
+  /** 6面サイコロ。 */
+  const dice = useRandomTool<number>(() => Math.floor(Math.random() * 6) + 1);
+  /** コイントス。 */
+  const coin = useRandomTool<CoinResult>(() => (Math.random() < 0.5 ? "表" : "裏"));
   const storedSettings = useStoredSettings();
   const isDark = storedSettings.theme === "dark";
   const skin = storedSettings.skin;
@@ -69,24 +70,12 @@ export default function Home(): ReactElement {
   const animateSettingsUpdate = (settings: Partial<StoredSettings>): void =>
     animateLayoutChange(() => updateSettings(settings));
 
-  /** 6面サイコロを振り、同じ結果でも表示アニメーションを再実行する。 */
-  const rollDice = (): void => {
-    setDiceResult(Math.floor(Math.random() * 6) + 1);
-    setDiceRollId((current) => current + 1);
-  };
-  /** コイントスを行い、同じ結果でも表示アニメーションを再実行する。 */
-  const tossCoin = (): void => {
-    setCoinResult(Math.random() < 0.5 ? "表" : "裏");
-    setCoinTossId((current) => current + 1);
-  };
   /** エネルギー値とランダム結果を初期状態へ戻す。 */
   const resetGame = (): void => {
     setP1Energy(0);
     setP2Energy(0);
-    setDiceResult(null);
-    setCoinResult(null);
-    setDiceRollId(0);
-    setCoinTossId(0);
+    dice.reset();
+    coin.reset();
   };
   /** 効果欄の開閉に伴う大きなレイアウト変更だけ滑らかに切り替える。 */
   const toggleCardText = (): void =>
@@ -111,17 +100,17 @@ export default function Home(): ReactElement {
       isDark={isDark}
       showCardText={showCardText}
       skin={skin}
-      diceResult={diceResult}
-      coinResult={coinResult}
-      diceRollId={diceRollId}
-      coinTossId={coinTossId}
+      diceResult={dice.result}
+      coinResult={coin.result}
+      diceRollId={dice.rollId}
+      coinTossId={coin.rollId}
       onTogglePlayerMode={togglePlayerMode}
       onResetGame={resetGame}
       onToggleDark={() => updateSettings({ theme: isDark ? "light" : "dark" })}
       onToggleCardText={toggleCardText}
       onCycleSkin={cycleSkin}
-      onRollDice={rollDice}
-      onTossCoin={tossCoin}
+      onRollDice={dice.trigger}
+      onTossCoin={coin.trigger}
     />
   );
 
