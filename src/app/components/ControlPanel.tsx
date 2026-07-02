@@ -2,6 +2,7 @@ import type { ReactElement, ReactNode } from "react";
 import { SKIN_LABEL } from "../skins";
 import { getPageTheme } from "../theme";
 import type { CoinResult, ControlPanelLayout, DesignSkin } from "../types";
+import type { RandomTool } from "../use-random-tool";
 
 type ControlPanelProps = {
   /** 操作バーを横並び固定にするか、横画面で縦並びへ切り替えるか。 */
@@ -14,14 +15,10 @@ type ControlPanelProps = {
   showCardText: boolean;
   /** 現在のデザインスキン。 */
   skin: DesignSkin;
-  /** 最後に振った6面サイコロの結果。未実行ならnull。 */
-  diceResult: number | null;
-  /** 最後のコイントス結果。未実行ならnull。 */
-  coinResult: CoinResult | null;
-  /** サイコロを振った回数。結果が同じ時も表示更新を識別する。 */
-  diceRollId: number;
-  /** コイントスを行った回数。結果が同じ時も表示更新を識別する。 */
-  coinTossId: number;
+  /** 6面サイコロの結果・実行回数・操作。 */
+  dice: RandomTool<number>;
+  /** コイントスの結果・実行回数・操作。 */
+  coin: RandomTool<CoinResult>;
   /** 1人用と2人用を切り替える。 */
   onTogglePlayerMode: () => void;
   /** エネルギーとランダム結果を初期化する。 */
@@ -32,10 +29,6 @@ type ControlPanelProps = {
   onToggleCardText: () => void;
   /** デザインスキンを次へ切り替える。 */
   onCycleSkin: () => void;
-  /** 6面サイコロを振る。 */
-  onRollDice: () => void;
-  /** コイントスを行う。 */
-  onTossCoin: () => void;
 };
 
 const CONTROL_BUTTON_BASE =
@@ -168,17 +161,13 @@ export function ControlPanel({
   isDark,
   showCardText,
   skin,
-  diceResult,
-  coinResult,
-  diceRollId,
-  coinTossId,
+  dice,
+  coin,
   onTogglePlayerMode,
   onResetGame,
   onToggleDark,
   onToggleCardText,
   onCycleSkin,
-  onRollDice,
-  onTossCoin,
 }: ControlPanelProps): ReactElement {
   const { controlBg, centerBg } = getPageTheme();
   const isHorizontal = layout === "horizontal";
@@ -222,14 +211,14 @@ export function ControlPanel({
       </ControlSlot>
       <RandomToolButton
         testid="dice-roll"
-        rollId={diceRollId}
-        result={diceResult}
+        rollId={dice.rollId}
+        result={dice.result}
         idleIcon="🎲"
         title="サイコロ"
         ariaLabel="サイコロを振る"
         fontSizeClass="text-sm"
         wrapperClass={diceCoinWrapperClass}
-        onClick={onRollDice}
+        onClick={dice.trigger}
         controlBg={controlBg}
       />
       <ControlSlot className={themeWrapperClass}>
@@ -246,14 +235,14 @@ export function ControlPanel({
       </ControlSlot>
       <RandomToolButton
         testid="coin-toss"
-        rollId={coinTossId}
-        result={coinResult}
+        rollId={coin.rollId}
+        result={coin.result}
         idleIcon="🪙"
         title="コイントス"
         ariaLabel="コイントスをする"
         fontSizeClass="text-[12px]"
         wrapperClass={diceCoinWrapperClass}
-        onClick={onTossCoin}
+        onClick={coin.trigger}
         controlBg={controlBg}
       />
       <ControlSlot className={skinWrapperClass}>

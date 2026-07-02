@@ -100,17 +100,13 @@ export default function Home(): ReactElement {
       isDark={isDark}
       showCardText={showCardText}
       skin={skin}
-      diceResult={dice.result}
-      coinResult={coin.result}
-      diceRollId={dice.rollId}
-      coinTossId={coin.rollId}
+      dice={dice}
+      coin={coin}
       onTogglePlayerMode={togglePlayerMode}
       onResetGame={resetGame}
       onToggleDark={() => updateSettings({ theme: isDark ? "light" : "dark" })}
       onToggleCardText={toggleCardText}
       onCycleSkin={cycleSkin}
-      onRollDice={dice.trigger}
-      onTossCoin={coin.trigger}
     />
   );
 
